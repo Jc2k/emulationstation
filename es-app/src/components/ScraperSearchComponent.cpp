@@ -338,7 +338,7 @@ void ScraperSearchComponent::updateInfoPane()
 
 bool ScraperSearchComponent::input(InputConfig* config, Input input)
 {
-	if(config->isMappedTo("b", input) && input.value != 0)
+	if(config->isMappedTo("a", input) && input.value != 0)
 	{
 		if(mBlockAccept)
 			return true;
@@ -472,7 +472,7 @@ std::vector<HelpPrompt> ScraperSearchComponent::getHelpPrompts()
 {
 	std::vector<HelpPrompt> prompts = mGrid.getHelpPrompts();
 	if(getSelectedIndex() != -1)
-		prompts.push_back(HelpPrompt("b", _("ACCEPT RESULT")));
+		prompts.push_back(HelpPrompt("a", _("ACCEPT RESULT")));
 	
 	return prompts;
 }

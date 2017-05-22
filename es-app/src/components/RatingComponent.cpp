@@ -127,7 +127,7 @@ void RatingComponent::render(const Eigen::Affine3f& parentTrans)
 
 bool RatingComponent::input(InputConfig* config, Input input)
 {
-	if(config->isMappedTo("b", input) && input.value != 0)
+	if(config->isMappedTo("a", input) && input.value != 0)
 	{
 		mValue += 1.f / NUM_RATING_STARS;
 		if(mValue > 1.0f)

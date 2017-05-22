@@ -367,7 +367,7 @@ std::vector<HelpPrompt> SystemView::getHelpPrompts()
 {
 	std::vector<HelpPrompt> prompts;
 	prompts.push_back(HelpPrompt("left/right", _("CHOOSE")));
-	prompts.push_back(HelpPrompt("b", _("SELECT")));
+	prompts.push_back(HelpPrompt("a", _("SELECT")));
 	return prompts;
 }
 

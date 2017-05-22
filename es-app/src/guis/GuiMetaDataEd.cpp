@@ -322,7 +322,7 @@ bool GuiMetaDataEd::input(InputConfig *config, Input input) {
         return true;
 
     const bool isStart = config->isMappedTo("start", input);
-    if (input.value != 0 && (config->isMappedTo("a", input) || isStart)) {
+    if (input.value != 0 && (config->isMappedTo("b", input) || isStart)) {
         close(isStart);
         return true;
     }
@@ -332,7 +332,7 @@ bool GuiMetaDataEd::input(InputConfig *config, Input input) {
 
 std::vector<HelpPrompt> GuiMetaDataEd::getHelpPrompts() {
     std::vector<HelpPrompt> prompts = mGrid.getHelpPrompts();
-    prompts.push_back(HelpPrompt("a", _("BACK")));
+    prompts.push_back(HelpPrompt("b", _("BACK")));
     prompts.push_back(HelpPrompt("start", _("CLOSE")));
     return prompts;
 }

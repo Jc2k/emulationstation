@@ -136,7 +136,7 @@ private:
 		std::vector<HelpPrompt> getHelpPrompts() override
 		{
 			auto prompts = mMenu.getHelpPrompts();
-			prompts.push_back(HelpPrompt("a", _("BACK")));
+			prompts.push_back(HelpPrompt(b", _("BACK")));
 			return prompts;
 		}
 	};
