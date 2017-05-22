@@ -99,7 +99,7 @@ void SystemView::populate()
 void SystemView::goToSystem(SystemData* system, bool animate)
 {
 
-        
+
 	setCursor(system);
 
 	if(!animate)
@@ -132,59 +132,12 @@ bool SystemView::input(InputConfig* config, Input input)
 			listInput(1);
 			return true;
 		}
-		if(config->isMappedTo("b", input))
+		if(config->isMappedTo("a", input))
 		{
 			stopScrolling();
 			ViewController::get()->goToGameList(getSelected());
 			return true;
 		}
-		if(config->isMappedTo("select", input) && RecalboxConf::getInstance()->get("system.es.menu") != "none")
-		{
-		  auto s = new GuiSettings(mWindow, _("QUIT").c_str());
-
-			Window *window = mWindow;
-			ComponentListRow row;
-			row.makeAcceptInputHandler([window] {
-			    window->pushGui(new GuiMsgBox(window, _("REALLY RESTART?"), _("YES"),
-											  [] {
-												  if (RecalboxSystem::getInstance()->reboot() != 0)  {
-													  LOG(LogWarning) << "Restart terminated with non-zero result!";
-												  }
-							  }, _("NO"), nullptr));
-			});
-			row.addElement(std::make_shared<TextComponent>(window, _("RESTART SYSTEM"), Font::get(FONT_SIZE_MEDIUM),
-														   0x777777FF), true);
-			s->addRow(row);
-
-			row.elements.clear();
-			row.makeAcceptInputHandler([window] {
-			    window->pushGui(new GuiMsgBox(window, _("REALLY SHUTDOWN?"), _("YES"),
-											  [] {
-												  if (RecalboxSystem::getInstance()->shutdown() != 0)  {
-													  LOG(LogWarning) <<
-																	  "Shutdown terminated with non-zero result!";
-												  }
-							  }, _("NO"), nullptr));
-			});
-			row.addElement(std::make_shared<TextComponent>(window, _("SHUTDOWN SYSTEM"), Font::get(FONT_SIZE_MEDIUM),
-														   0x777777FF), true);
-			s->addRow(row);
-			row.elements.clear();
-			row.makeAcceptInputHandler([window] {
-				window->pushGui(new GuiMsgBox(window, _("REALLY SHUTDOWN WITHOUT SAVING METADATAS?"), _("YES"),
-											  [] {
-												  if (RecalboxSystem::getInstance()->fastShutdown() != 0)  {
-													  LOG(LogWarning) <<
-																	  "Shutdown terminated with non-zero result!";
-												  }
-											  }, _("NO"), nullptr));
-			});
-			row.addElement(std::make_shared<TextComponent>(window, _("FAST SHUTDOWN SYSTEM"), Font::get(FONT_SIZE_MEDIUM),
-														   0x777777FF), true);
-			s->addRow(row);
-			mWindow->pushGui(s);
-		}
-
 	}else{
 		if(config->isMappedTo("left", input) || config->isMappedTo("right", input))
 			listInput(0);
@@ -201,7 +154,7 @@ void SystemView::update(int deltaTime)
 
 void SystemView::onCursorChanged(const CursorState& state)
 {
-    
+
 	if(lastSystem != getSelected()){
 		lastSystem = getSelected();
 		AudioManager::getInstance()->themeChanged(getSelected()->getTheme());
@@ -219,13 +172,13 @@ void SystemView::onCursorChanged(const CursorState& state)
 
 	float endPos = target; // directly
     float dist = std::abs(endPos - startPos);
-	
+
     if(std::abs(target + posMax - startPos) < dist)
 		endPos = target + posMax; // loop around the end (0 -> max)
     if(std::abs(target - posMax - startPos) < dist)
 		endPos = target - posMax; // loop around the start (max - 1 -> -1)
 
-	
+
 	// animate mSystemInfo's opacity (fade out, wait, fade back in)
 
 	cancelAnimation(1);
@@ -335,7 +288,7 @@ void SystemView::render(const Eigen::Affine3f& parentTrans)
 		return;
 
 	Eigen::Affine3f trans = getTransform() * parentTrans;
-	
+
 	// draw the list elements (titles, backgrounds, logos)
 	const float logoSizeX = logoSize().x() + LOGO_PADDING;
 

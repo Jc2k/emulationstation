@@ -16,7 +16,7 @@ mHeaderText(window), mHeaderImage(window), mBackground(window), mThemeExtras(win
 	mHeaderText.setSize(mSize.x(), 0);
 	mHeaderText.setPosition(0, 0);
 	mHeaderText.setAlignment(ALIGN_CENTER);
-	
+
 	mHeaderImage.setResize(0, mSize.y() * 0.185f);
 	mHeaderImage.setOrigin(0.5f, 0.0f);
 	mHeaderImage.setPosition(mSize.x() / 2, 0);
@@ -87,7 +87,7 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 {
 	if(input.value != 0)
 	{
-		if(config->isMappedTo("b", input))
+		if(config->isMappedTo("a", input))
 		{
 			FileData* cursor = getCursor();
 			if(cursor->getType() == GAME)
@@ -102,9 +102,9 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 					populateList(cursor->getChildren());
 				}
 			}
-				
+
 			return true;
-		}else if(config->isMappedTo("a", input))
+		}else if(config->isMappedTo("b", input))
 		{
 			if(mCursorStack.size())
 			{

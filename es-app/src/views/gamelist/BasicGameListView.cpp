@@ -143,7 +143,7 @@ void BasicGameListView::populateList(const std::vector<FileData*>& files)
 			}
 		}
 	}
-	
+
 	// Do not show double names in favorite system.
 	if(!systemData->isFavorite())
 	{
@@ -241,7 +241,7 @@ void BasicGameListView::setCursor(FileData* cursor)
 				tmp.push(ptr);
 				ptr = ptr->getParent();
 			}
-			
+
 			// flip the stack and put it in mCursorStack
 			mCursorStack = std::stack<FileData*>();
 			while(!tmp.empty())
@@ -265,9 +265,9 @@ std::vector<HelpPrompt> BasicGameListView::getHelpPrompts()
 	if(Settings::getInstance()->getBool("QuickSystemSelect") && !Settings::getInstance()->getBool("HideSystemView"))
 	  prompts.push_back(HelpPrompt("left/right", _("SYSTEM")));
 	prompts.push_back(HelpPrompt("up/down", _("CHOOSE")));
-	prompts.push_back(HelpPrompt("b", _("LAUNCH")));
+	prompts.push_back(HelpPrompt("a", _("LAUNCH")));
 	if(!Settings::getInstance()->getBool("HideSystemView"))
-	  prompts.push_back(HelpPrompt("a", _("BACK")));
+	  prompts.push_back(HelpPrompt("b", _("BACK")));
 	if(getRoot()->getSystem() != SystemData::getFavoriteSystem()) {
 	  prompts.push_back(HelpPrompt("y", _("Favorite")));
 	  prompts.push_back(HelpPrompt("select", _("OPTIONS")));

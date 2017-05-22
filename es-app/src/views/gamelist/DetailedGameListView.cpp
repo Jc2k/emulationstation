@@ -5,15 +5,15 @@
 #include "animations/LambdaAnimation.h"
 #include "Locale.h"
 
-DetailedGameListView::DetailedGameListView(Window* window, FileData* root, SystemData* system) : 
-	BasicGameListView(window, root), 
-	mDescContainer(window), mDescription(window), 
-	mImage(window), mSystem(system), 
+DetailedGameListView::DetailedGameListView(Window* window, FileData* root, SystemData* system) :
+	BasicGameListView(window, root),
+	mDescContainer(window), mDescription(window),
+	mImage(window), mSystem(system),
 
-	mLblRating(window), mLblReleaseDate(window), mLblDeveloper(window), mLblPublisher(window), 
+	mLblRating(window), mLblReleaseDate(window), mLblDeveloper(window), mLblPublisher(window),
 	mLblGenre(window), mLblPlayers(window), mLblLastPlayed(window), mLblPlayCount(window), mLblFavorite(window),
 
-	mRating(window), mReleaseDate(window), mDeveloper(window), mPublisher(window), 
+	mRating(window), mReleaseDate(window), mDeveloper(window), mPublisher(window),
 	mGenre(window), mPlayers(window), mLastPlayed(window), mPlayCount(window), mFavorite(window)
 {
 	//mHeaderImage.setPosition(mSize.x() * 0.25f, 0);
@@ -106,7 +106,7 @@ void DetailedGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& them
 	{
 		assert(labels.size() == 8);
 		const char* lblElements[8] = {
-			"md_lbl_rating", "md_lbl_releasedate", "md_lbl_developer", "md_lbl_publisher", 
+			"md_lbl_rating", "md_lbl_releasedate", "md_lbl_developer", "md_lbl_publisher",
 			"md_lbl_genre", "md_lbl_players", "md_lbl_lastplayed", "md_lbl_playcount"
 		};
 
@@ -161,7 +161,7 @@ void DetailedGameListView::initMDLabels()
 	const unsigned int rowCount = components.size() / 2;
 
 	Vector3f start(mSize.x() * 0.01f, mSize.y() * 0.625f, 0.0f);
-	
+
 	const float colSize = (mSize.x() * 0.48f) / colCount;
 	const float rowPadding = 0.01f * mSize.y();
 
@@ -246,7 +246,7 @@ void DetailedGameListView::updateInfoPanel()
 			mPlayCount.setValue(file->metadata.get("playcount"));
 			mFavorite.setValue(file->metadata.get("favorite"));
 		}
-		
+
 		fadingOut = false;
 	}
 
@@ -263,7 +263,7 @@ void DetailedGameListView::updateInfoPanel()
 		//   then animate if reverse != fadingOut
 		// an animation is not playing
 		//   then animate if opacity != our target opacity
-		if((comp->isAnimationPlaying(0) && comp->isAnimationReversed(0) != fadingOut) || 
+		if((comp->isAnimationPlaying(0) && comp->isAnimationReversed(0) != fadingOut) ||
 			(!comp->isAnimationPlaying(0) && comp->getOpacity() != (fadingOut ? 0 : 255)))
 		{
 			auto func = [comp](float t)
@@ -329,13 +329,12 @@ std::vector<HelpPrompt> DetailedGameListView::getHelpPrompts()
 	  prompts.push_back(HelpPrompt("left/right", _("SYSTEM")));
 	}
 	prompts.push_back(HelpPrompt("up/down", _("CHOOSE")));
-	prompts.push_back(HelpPrompt("b", _("LAUNCH")));
+	prompts.push_back(HelpPrompt("a", _("LAUNCH")));
 	if(!Settings::getInstance()->getBool("HideSystemView"))
-	  prompts.push_back(HelpPrompt("a", _("BACK")));
+	  prompts.push_back(HelpPrompt("b", _("BACK")));
 	if(getRoot()->getSystem() != SystemData::getFavoriteSystem()) {
 	  prompts.push_back(HelpPrompt("y", _("Favorite")));
 	  prompts.push_back(HelpPrompt("select", _("OPTIONS")));
 	}
 	return prompts;
 }
-
