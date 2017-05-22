@@ -25,7 +25,6 @@
 #include <boost/algorithm/string.hpp>
 #include <RecalboxConf.h>
 #include "resources/Font.h"
-#include "NetworkThread.h"
 #include "RecalboxSystem.h"
 #include "FileSorts.h"
 
@@ -340,11 +339,6 @@ int main(int argc, char* argv[])
                             RecalboxSystem::getInstance()->updateLastChangelogFile();
                         }, "", nullptr, "", nullptr, ALIGN_LEFT));
     }
-
-	// UPDATE CHECK THREAD
-	if(recalboxConf->get("updates.enabled") == "1"){
-		NetworkThread * nthread = new NetworkThread(&window);
-	}
 
 	//run the command line scraper then quit
 	if(scrape_cmdline)
