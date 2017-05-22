@@ -124,7 +124,7 @@ private:
 
 		bool input(InputConfig* config, Input input) override
 		{
-			if(config->isMappedTo("a", input) && input.value != 0)
+			if(config->isMappedTo("b", input) && input.value != 0)
 			{
 				delete this;
 				return true;
@@ -189,7 +189,7 @@ public:
 	{
 		if(input.value != 0)
 		{
-			if(config->isMappedTo("b", input))
+			if(config->isMappedTo("a", input))
 			{
 				open();
 				return true;
@@ -342,7 +342,7 @@ private:
 		if(!mMultiSelect)
 		  prompts.push_back(HelpPrompt("left/right", _("CHANGE")));
 		
-		prompts.push_back(HelpPrompt("b", _("SELECT")));
+		prompts.push_back(HelpPrompt("a", _("SELECT")));
 		return prompts;
 	}
 
