@@ -61,7 +61,7 @@ void ISimpleGameListView::onFileChanged(FileData* file, FileChangeType change)
 		bool isFavorite = file->metadata.get("favorite") == "true";
 		bool foundInFavorite = false;
 		/* Removing favortie case : */
-		for(auto gameInFavorite = favoriteSystem->getRootFolder()->getChildren().begin();
+		/*for(auto gameInFavorite = favoriteSystem->getRootFolder()->getChildren().begin();
 			gameInFavorite != favoriteSystem->getRootFolder()->getChildren().end();
 			gameInFavorite ++){
 				if((*gameInFavorite) == file){
@@ -73,13 +73,13 @@ void ISimpleGameListView::onFileChanged(FileData* file, FileChangeType change)
 					foundInFavorite = true;
 					break;
 				}
-		}
+		}*/
 		/* Adding favorite case : */
-		if(!foundInFavorite && isFavorite){
+		/*if(!foundInFavorite && isFavorite){
 			favoriteSystem->getRootFolder()->addAlreadyExisitingChild(file);
 			ViewController::get()->setInvalidGamesList(SystemData::getFavoriteSystem());
 			ViewController::get()->getSystemListView()->manageFavorite();
-		}
+		}*/
 	}
 }
 

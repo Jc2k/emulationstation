@@ -31,6 +31,7 @@ void BasicGameListView::onFileChanged(FileData* file, FileChangeType change)
 
 	if(change == FILE_METADATA_CHANGED)
 	{
+		LOG(LogWarning) << "EXCREMENT";
 		// might switch to a detailed view
 		ViewController::get()->reloadGameListView(this);
 		return;
