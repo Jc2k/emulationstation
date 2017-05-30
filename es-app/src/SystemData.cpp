@@ -17,6 +17,7 @@
 #include <boost/thread.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/make_shared.hpp>
+#include "Lobby.h"
 
 std::vector<SystemData*> SystemData::sSystemVector;
 
@@ -154,7 +155,7 @@ void SystemData::launchGame(Window* window, FileData* game)
 	LOG(LogInfo) << "Controllers config : " << controlersConfig;
 	window->deinit();
 
-
+  LobbyThread::getInstance()->startBroadcast(std::string("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
 
 	std::string command = mLaunchCommand;
 
@@ -180,6 +181,8 @@ void SystemData::launchGame(Window* window, FileData* game)
 	{
 		LOG(LogWarning) << "...launch terminated with nonzero exit code " << exitCode << "!";
 	}
+
+  LobbyThread::getInstance()->stopBroadcast();
 
 	window->init();
 	VolumeControl::getInstance()->init();
@@ -594,4 +597,3 @@ int SystemData::getSystemIndex(std::string name) {
 	}
 	return -1;
 }
-

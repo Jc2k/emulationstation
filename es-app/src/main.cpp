@@ -27,6 +27,7 @@
 #include "resources/Font.h"
 #include "RecalboxSystem.h"
 #include "FileSorts.h"
+#include "Lobby.h"
 
 
 #ifdef WIN32
@@ -95,7 +96,7 @@ bool parseArgs(int argc, char* argv[], unsigned int* width, unsigned int* height
 			AttachConsole(ATTACH_PARENT_PROCESS);
 			freopen("CONOUT$", "wb", stdout);
 #endif
-			std::cout << 
+			std::cout <<
 				"EmulationStation, a graphical front-end for ROM browsing.\n"
 				"Written by Alec \"Aloshi\" Lofquist.\n"
 				"Version " << PROGRAM_VERSION_STRING << ", built " << PROGRAM_BUILT_STRING << "\n\n"
@@ -138,7 +139,7 @@ bool verifyHomeFolderExists()
 	return true;
 }
 
-// Returns true if everything is OK, 
+// Returns true if everything is OK,
 bool loadSystemConfigFile(const char** errorString)
 {
 	*errorString = NULL;
@@ -188,7 +189,7 @@ int setLocale(char * argv1)
     		getcwd(abs_exe_path, sizeof(abs_exe_path));
     		chdir(path_save);
   	}
-	boost::locale::localization_backend_manager my = boost::locale::localization_backend_manager::global(); 
+	boost::locale::localization_backend_manager my = boost::locale::localization_backend_manager::global();
 	// Get global backend
 
     	my.select("std");
@@ -226,8 +227,8 @@ int main(int argc, char* argv[])
 	// only show the console on Windows if HideConsole is false
 #ifdef WIN32
 	// MSVC has a "SubSystem" option, with two primary options: "WINDOWS" and "CONSOLE".
-	// In "WINDOWS" mode, no console is automatically created for us.  This is good, 
-	// because we can choose to only create the console window if the user explicitly 
+	// In "WINDOWS" mode, no console is automatically created for us.  This is good,
+	// because we can choose to only create the console window if the user explicitly
 	// asks for it, preventing it from flashing open and then closing.
 	// In "CONSOLE" mode, a console is always automatically created for us before we
 	// enter main. In this case, we can only hide the console after the fact, which
@@ -249,7 +250,7 @@ int main(int argc, char* argv[])
 	}else{
 		// we want to hide the console
 		// if we're compiled with the "WINDOWS" subsystem, this is already done.
-		// if we're compiled with the "CONSOLE" subsystem, a console is already created; 
+		// if we're compiled with the "CONSOLE" subsystem, a console is already created;
 		// it'll flash open, but we hide it nearly immediately
 		if(GetConsoleWindow()) // should only pass in "CONSOLE" mode
 			ShowWindow(GetConsoleWindow(), SW_HIDE);
@@ -273,11 +274,13 @@ int main(int argc, char* argv[])
 	// other init
 	FileSorts::init(); // require locale
 	initMetadata(); // require locale
-	
+
     Renderer::init(width, height);
 	Window window;
 	ViewController::init(&window);
 	window.pushGui(ViewController::get());
+
+	LobbyThread::getInstance();
 
 	if(!scrape_cmdline)
     {
@@ -315,7 +318,7 @@ int main(int argc, char* argv[])
 		// we can't handle es_systems.cfg file problems inside ES itself, so display the error message then quit
 		window.pushGui(new GuiMsgBox(&window,
 			errorMsg,
-					     _("QUIT"), [] { 
+					     _("QUIT"), [] {
 				SDL_Event* quit = new SDL_Event();
 				quit->type = SDL_QUIT;
 				SDL_PushEvent(quit);
@@ -379,7 +382,7 @@ int main(int argc, char* argv[])
 	bool running = true;
 	bool doReboot = false;
 	bool doShutdown = false;
-	
+
 	while(running)
 	{
 		SDL_Event event;
