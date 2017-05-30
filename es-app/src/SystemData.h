@@ -37,7 +37,7 @@ public:
 	std::string getGamelistPath(bool forWrite) const;
 	bool hasGamelist() const;
 	std::string getThemePath() const;
-	
+
 	unsigned int getGameCount() const;
 	unsigned int getFavoritesCount() const;
 	unsigned int getHiddenCount() const;
@@ -46,7 +46,6 @@ public:
 
 	static void deleteSystems();
 	static bool loadConfig(); //Load the system config file at getConfigPath(). Returns true if no errors were encountered. An example will be written if the file doesn't exist.
-	static void writeExampleConfig(const std::string& path);
 	static std::string getConfigPath(bool forWrite); // if forWrite, will only return ~/.emulationstation/es_systems.cfg, never /etc/emulationstation/es_systems.cfg
 
 	static std::vector<SystemData*> sSystemVector;
@@ -55,7 +54,7 @@ public:
 
 	inline std::vector<SystemData*>::const_iterator getIterator() const { return std::find(sSystemVector.begin(), sSystemVector.end(), this); };
 	inline std::vector<SystemData*>::const_reverse_iterator getRevIterator() const { return std::find(sSystemVector.rbegin(), sSystemVector.rend(), this); };
-	
+
 	inline SystemData* getNext() const
 	{
 		auto it = getIterator();
