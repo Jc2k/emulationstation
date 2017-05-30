@@ -31,9 +31,10 @@ public:
 	std::vector<HelpPrompt> getHelpPrompts() override;
 	virtual HelpStyle getHelpStyle() override;
 	void populate();
-	void removeFavoriteSystem();
+
 	void manageFavorite();
 	void addSystem(SystemData * it);
+	void removeSystem(SystemData * system);
 
 protected:
 	void onCursorChanged(const CursorState& state) override;

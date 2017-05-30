@@ -86,6 +86,14 @@ void SystemView::addSystem(SystemData * it){
 	this->add(e);
 }
 
+void SystemView::removeSystem(SystemData * system){
+	for(auto it = mEntries.begin(); it != mEntries.end(); it++)
+		if(it->object == system){
+			mEntries.erase(it);
+			break;
+		}
+}
+
 void SystemView::populate()
 {
 	mEntries.clear();
@@ -99,8 +107,6 @@ void SystemView::populate()
 
 void SystemView::goToSystem(SystemData* system, bool animate)
 {
-
-
 	setCursor(system);
 
 	if(!animate)
@@ -379,14 +385,6 @@ HelpStyle SystemView::getHelpStyle()
 	return style;
 }
 
-void SystemView::removeFavoriteSystem(){
-	for(auto it = mEntries.begin(); it != mEntries.end(); it++)
-		if(it->object->isFavorite()){
-			mEntries.erase(it);
-			break;
-		}
-}
-
 void SystemView::manageFavorite(){
 	bool hasFavorite = false;
 	for(auto it = mEntries.begin(); it != mEntries.end(); it++)
@@ -396,7 +394,7 @@ void SystemView::manageFavorite(){
 	SystemData *favorite = SystemData::getFavoriteSystem();
 	if(hasFavorite) {
 		if (favorite->getFavoritesCount() == 0) {
-			removeFavoriteSystem();
+			removeSystem(favorite);
 		}
 	}else {
 		if (favorite->getFavoritesCount() > 0) {

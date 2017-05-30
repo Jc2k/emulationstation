@@ -83,6 +83,10 @@ public:
 
 
 	std::map<std::string, std::vector<std::string> *> * getEmulators();
+
+	virtual bool allowGameOptions() const = 0;
+	virtual bool allowFavoriting() const = 0;
+
 private:
 	std::string mName;
 	std::string mFullName;

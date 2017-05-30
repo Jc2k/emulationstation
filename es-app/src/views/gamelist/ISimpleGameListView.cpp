@@ -125,7 +125,7 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 			}
 
 			return true;
-		}else if (config->isMappedTo("y", input))
+		}/*else if (config->isMappedTo("y", input))
 		{
 			FileData* cursor = getCursor();
 			if (!ViewController::get()->getState().getSystem()->isFavorite() && cursor->getSystem()->getHasFavorites())
@@ -162,7 +162,7 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 					updateInfoPanel();
 				}
 			}
-		}else if(config->isMappedTo("right", input))
+		}*/else if(config->isMappedTo("right", input))
 		{
 			if(Settings::getInstance()->getBool("QuickSystemSelect") && !Settings::getInstance()->getBool("HideSystemView"))
 			{

@@ -10,3 +10,11 @@ EmulatorData::EmulatorData(std::string name, std::string fullName, std::string s
 
 
 }
+
+bool EmulatorData::allowGameOptions() const {
+  return true;
+}
+
+bool EmulatorData::allowFavoriting() const {
+  return true;
+}

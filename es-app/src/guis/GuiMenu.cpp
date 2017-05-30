@@ -73,7 +73,7 @@ void GuiMenu::createInputTextRow(GuiSettings *gui, std::string title, const char
         }
         RecalboxConf::getInstance()->set(settingsID, newVal);
     }; // ok callback (apply new value to ed)
-    
+
     row.makeAcceptInputHandler([this, title, updateVal, settingsID] {
         if (Settings::getInstance()->getBool("UseOSK")) {
             mWindow->pushGui(
@@ -479,7 +479,7 @@ GuiMenu::GuiMenu(Window *window) : GuiComponent(window), mMenu(window, _("MAIN M
                              // For each activated system
                              std::vector<SystemData *> systems = SystemData::sSystemVector;
                              for (auto system = systems.begin(); system != systems.end(); system++) {
-                                 if ((*system) != SystemData::getFavoriteSystem()) {
+                                 if ((*system)->allowGameOptions()) {
                                      ComponentListRow systemRow;
                                      auto systemText = std::make_shared<TextComponent>(mWindow, (*system)->getFullName(),
                                                                                        Font::get(FONT_SIZE_MEDIUM),
