@@ -57,9 +57,9 @@ void ISimpleGameListView::onFileChanged(FileData* file, FileChangeType change)
 
 	/* Favorite */
 	if(file->getType() == GAME){
-		SystemData * favoriteSystem = SystemData::getFavoriteSystem();
+		/*SystemData * favoriteSystem = SystemData::getFavoriteSystem();
 		bool isFavorite = file->metadata.get("favorite") == "true";
-		bool foundInFavorite = false;
+		bool foundInFavorite = false;*/
 		/* Removing favortie case : */
 		/*for(auto gameInFavorite = favoriteSystem->getRootFolder()->getChildren().begin();
 			gameInFavorite != favoriteSystem->getRootFolder()->getChildren().end();

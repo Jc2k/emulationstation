@@ -16,6 +16,8 @@
 #include "ThemeData.h"
 #include "AudioManager.h"
 #include "Locale.h"
+#include "LobbyData.h"
+
 
 #define SELECTED_SCALE 1.5f
 #define LOGO_PADDING ((logoSize().x() * (SELECTED_SCALE - 1)/2) + (mSize.x() * 0.06f))
@@ -86,14 +88,16 @@ void SystemView::addSystem(SystemData * it){
 
 	this->add(e);
 }
+
 void SystemView::populate()
 {
 	mEntries.clear();
 
-	for(auto it = SystemData::sSystemVector.begin(); it != SystemData::sSystemVector.end(); it++)
-	{
+	for(auto it = SystemData::sSystemVector.begin(); it != SystemData::sSystemVector.end(); it++){
 		addSystem((*it));
 	}
+
+	addSystem(new LobbyData());
 }
 
 void SystemView::goToSystem(SystemData* system, bool animate)

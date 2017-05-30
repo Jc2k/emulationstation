@@ -18,10 +18,29 @@
 #include <boost/asio/io_service.hpp>
 #include <boost/make_shared.hpp>
 #include "Lobby.h"
+#include "EmulatorData.h"
+#include "FavoriteData.h"
+
 
 std::vector<SystemData*> SystemData::sSystemVector;
 
 namespace fs = boost::filesystem;
+
+SystemData::SystemData(std::string name, std::string fullName, std::string themeFolder) {
+  mName = name;
+	mFullName = fullName;
+  mThemeFolder = themeFolder;
+  mStartPath = "";
+	mLaunchCommand = "";
+
+	mRootFolder = new FileData(FOLDER, mStartPath, this);
+	mRootFolder->metadata.set("name", mFullName);
+
+	mIsFavorite = true;
+	mPlatformIds.push_back(PlatformIds::PLATFORM_IGNORE);
+
+	loadTheme();
+}
 
 SystemData::SystemData(std::string name, std::string fullName, std::string startPath,
                            std::vector<std::string> extensions, std::string command,
@@ -86,6 +105,7 @@ SystemData::SystemData(std::string name, std::string fullName, std::string comma
 		mRootFolder->sort(FileSorts::SortTypes.at(0));
 	mIsFavorite = true;
 	mPlatformIds.push_back(PlatformIds::PLATFORM_IGNORE);
+
 	loadTheme();
 }
 
@@ -295,7 +315,7 @@ SystemData * createSystem(pugi::xml_node * systemsNode, int index ){
 	}
 
 
-	SystemData* newSys = new SystemData(name,
+	SystemData* newSys = new EmulatorData(name,
 										fullname,
 										path, extensions,
 										cmd, platformIds,
@@ -388,7 +408,7 @@ bool SystemData::loadConfig()
 
 		if (name == "favorites") {
 			LOG(LogInfo) << "creating favorite system";
-			SystemData *newSys = new SystemData("favorites", fullname, cmd, themeFolder, &sSystemVector);
+			FavoriteData *newSys = new FavoriteData(fullname, cmd, themeFolder, &sSystemVector);
 			sSystemVector.push_back(newSys);
 		}
 	}

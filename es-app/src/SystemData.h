@@ -11,12 +11,16 @@
 class SystemData
 {
 public:
+	SystemData(std::string name, std::string fullName, std::string themeFolder);
+
 	SystemData(std::string name, std::string fullName, std::string startPath,
                                std::vector<std::string> extensions, std::string command,
                                std::vector<PlatformIds::PlatformId> platformIds, std::string themeFolder,
                                std::map<std::string, std::vector<std::string>*>* map);
+
 	SystemData(std::string name, std::string fullName, std::string command,
 			   std::string themeFolder, std::vector<SystemData*>* systems);
+
 	~SystemData();
 
 	inline FileData* getRootFolder() const { return mRootFolder; };
@@ -85,7 +89,6 @@ private:
 	std::string mStartPath;
 	std::vector<std::string> mSearchExtensions;
 	std::string mLaunchCommand;
-	std::vector<PlatformIds::PlatformId> mPlatformIds;
 	std::string mThemeFolder;
 	std::shared_ptr<ThemeData> mTheme;
 
@@ -94,7 +97,10 @@ private:
 
 	void populateFolder(FileData* folder);
 
-	FileData* mRootFolder;
 	std::map<std::string, std::vector<std::string> *> *mEmulators;
 
+protected:
+	// FIXME: This probably shouldn't be in SystemData
+	FileData* mRootFolder;
+	std::vector<PlatformIds::PlatformId> mPlatformIds;
 };
