@@ -39,9 +39,6 @@ SystemView::SystemView(Window* window) : IList<SystemViewData, SystemData*>(wind
 }
 
 void SystemView::addSystem(SystemData * it){
-	if((it)->getRootFolder()->getChildren().size() == 0){
-		return;
-	}
 	const std::shared_ptr<ThemeData>& theme = (it)->getTheme();
 
 	Entry e;
