@@ -54,15 +54,6 @@ int runShutdownCommand()
 #endif
 }
 
-int runRestartCommand()
-{
-#ifdef WIN32 // windows
-	return system("shutdown -r -t 0");
-#else // osx / linux
-	return system("reboot");
-#endif
-}
-
 int runSystemCommand(const std::string& cmd_utf8)
 {
 #ifdef WIN32

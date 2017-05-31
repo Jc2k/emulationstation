@@ -241,17 +241,6 @@ bool RecalboxSystem::disableWifi() {
 
 
 bool RecalboxSystem::halt(bool reboot, bool fast) {
-    SDL_Event *quit = new SDL_Event();
-    if (fast)
-        if (reboot)
-            quit->type = SDL_FAST_QUIT | SDL_RB_REBOOT;
-        else
-            quit->type = SDL_FAST_QUIT | SDL_RB_SHUTDOWN;
-    else if (reboot)
-        quit->type = SDL_QUIT | SDL_RB_REBOOT;
-    else
-        quit->type = SDL_QUIT | SDL_RB_SHUTDOWN;
-    SDL_PushEvent(quit);
     return 0;
 }
 

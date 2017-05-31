@@ -257,25 +257,12 @@ GuiMenu::GuiMenu(Window *window) : GuiComponent(window), mMenu(window, _("MAIN M
 
 			   securityGui->addSaveFunc([this, securityEnabled] {
 			       Window* window = this->mWindow;
-			       bool reboot = false;
-
 			       if (securityEnabled->changed()) {
 				 RecalboxConf::getInstance()->set("system.security.enabled",
 								  securityEnabled->getState() ? "1" : "0");
 				 RecalboxConf::getInstance()->saveRecalboxConf();
-				 reboot = true;
 			       }
 
-			       if (reboot) {
-			       	 window->pushGui(
-						 new GuiMsgBox(window, _("THE SYSTEM WILL NOW REBOOT"), _("OK"),
-							       [window] {
-								 if (runRestartCommand() != 0) {
-								   LOG(LogWarning) << "Reboot terminated with non-zero result!";
-								 }
-							       })
-						 );
-			       }
                              });
 			   mWindow->pushGui(securityGui);
                          };
@@ -289,34 +276,19 @@ GuiMenu::GuiMenu(Window *window) : GuiComponent(window), mMenu(window, _("MAIN M
                      }
 
                      s->addSaveFunc([overclock_choice, window, language_choice, language, optionsStorage, selectedStorage] {
-                         bool reboot = false;
                          if (optionsStorage->changed()) {
                              RecalboxSystem::getInstance()->setStorage(optionsStorage->getSelected());
-                             reboot = true;
                          }
 
                          if (Settings::getInstance()->getString("Overclock") != overclock_choice->getSelected()) {
                              Settings::getInstance()->setString("Overclock", overclock_choice->getSelected());
                              RecalboxSystem::getInstance()->setOverclock(overclock_choice->getSelected());
-                             reboot = true;
                          }
                          if (language != language_choice->getSelected()) {
                              RecalboxConf::getInstance()->set("system.language",
                                                               language_choice->getSelected());
                              RecalboxConf::getInstance()->saveRecalboxConf();
-                             reboot = true;
                          }
-                         if (reboot) {
-                             window->pushGui(
-					     new GuiMsgBox(window, _("THE SYSTEM WILL NOW REBOOT"), _("OK"),
-                                           [window] {
-                                               if (runRestartCommand() != 0) {
-                                                   LOG(LogWarning) << "Reboot terminated with non-zero result!";
-                                               }
-                                           })
-                             );
-                         }
-
                      });
                      mWindow->pushGui(s);
 
