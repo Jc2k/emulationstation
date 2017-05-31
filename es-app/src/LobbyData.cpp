@@ -5,6 +5,10 @@ LobbyData::LobbyData() : SystemData("lobby", std::string("Lobby"), std::string("
 
 }
 
+bool LobbyData::hasAnyThumbnails() const {
+  return false;
+}
+
 bool LobbyData::allowGameOptions() const {
   return false;
 }

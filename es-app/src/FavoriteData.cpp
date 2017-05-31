@@ -5,6 +5,10 @@ FavoriteData::FavoriteData(std::string fullName, std::string command, std::strin
 
 }
 
+bool FavoriteData::hasAnyThumbnails() const {
+  return false;
+}
+
 bool FavoriteData::allowGameOptions() const {
   return false;
 }

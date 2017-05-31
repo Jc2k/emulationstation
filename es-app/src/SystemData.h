@@ -83,6 +83,7 @@ public:
 
 	std::map<std::string, std::vector<std::string> *> * getEmulators();
 
+	virtual bool hasAnyThumbnails() const = 0;
 	virtual bool allowGameOptions() const = 0;
 	virtual bool allowFavoriting() const = 0;
 

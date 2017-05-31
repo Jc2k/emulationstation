@@ -11,6 +11,16 @@ EmulatorData::EmulatorData(std::string name, std::string fullName, std::string s
 
 }
 
+bool EmulatorData::hasAnyThumbnails() const {
+	auto files = getRootFolder()->getFilesRecursive(GAME | FOLDER);
+	for(auto it = files.begin(); it != files.end(); it++) {
+		if(!(*it)->getThumbnailPath().empty()) {
+      return true;
+		}
+	}
+  return false;
+}
+
 bool EmulatorData::allowGameOptions() const {
   return true;
 }
