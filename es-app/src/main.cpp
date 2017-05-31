@@ -18,7 +18,6 @@
 #include "EmulationStation.h"
 #include "RecalboxSystem.h"
 #include "Settings.h"
-#include "ScraperCmdLine.h"
 #include "VolumeControl.h"
 #include <sstream>
 #include "Locale.h"
@@ -35,8 +34,6 @@
 #endif
 
 namespace fs = boost::filesystem;
-
-bool scrape_cmdline = false;
 
 void playSound(std::string name);
 
@@ -83,9 +80,6 @@ bool parseArgs(int argc, char* argv[], unsigned int* width, unsigned int* height
 			bool vsync = (strcmp(argv[i + 1], "on") == 0 || strcmp(argv[i + 1], "1") == 0) ? true : false;
 			Settings::getInstance()->setBool("VSync", vsync);
 			i++; // skip vsync value
-		}else if(strcmp(argv[i], "--scrape") == 0)
-		{
-			scrape_cmdline = true;
 		}else if(strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0)
 		{
 #ifdef WIN32
@@ -108,7 +102,6 @@ bool parseArgs(int argc, char* argv[], unsigned int* width, unsigned int* height
 				"--no-exit			don't show the exit option in the menu\n"
 				"--hide-systemview		show only gamelist view, no system view\n"
 				"--debug				more logging, show console on Windows\n"
-				"--scrape			scrape using command line interface\n"
 				"--windowed			not fullscreen, should be used with --resolution\n"
 				"--vsync [1/on or 0/off]		turn vsync on or off (default is on)\n"
 				"--help, -h			summon a sentient, angry tuba\n\n"
@@ -269,22 +262,18 @@ int main(int argc, char* argv[])
 	ViewController::init(&window);
 	window.pushGui(ViewController::get());
 
-	LobbyThread::getInstance();
-
-	if(!scrape_cmdline)
-    {
-        if(!window.init(width, height, false))
-		{
-			LOG(LogError) << "Window failed to initialize!";
-			return 1;
-		}
-
-		std::string glExts = (const char*)glGetString(GL_EXTENSIONS);
-		LOG(LogInfo) << "Checking available OpenGL extensions...";
-		LOG(LogInfo) << " ARB_texture_non_power_of_two: " << (glExts.find("ARB_texture_non_power_of_two") != std::string::npos ? "OK" : "MISSING");
-
-		window.renderLoadingScreen();
+	if(!window.init(width, height, false)) {
+		LOG(LogError) << "Window failed to initialize!";
+		return 1;
 	}
+
+	std::string glExts = (const char*)glGetString(GL_EXTENSIONS);
+	LOG(LogInfo) << "Checking available OpenGL extensions...";
+	LOG(LogInfo) << " ARB_texture_non_power_of_two: " << (glExts.find("ARB_texture_non_power_of_two") != std::string::npos ? "OK" : "MISSING");
+
+	window.renderLoadingScreen();
+
+	LobbyThread::getInstance();
 
 	// Initialize audio manager
 	VolumeControl::getInstance()->init();
@@ -331,12 +320,6 @@ int main(int argc, char* argv[])
                             RecalboxSystem::getInstance()->updateLastChangelogFile();
                         }, "", nullptr, "", nullptr, ALIGN_LEFT));
     }
-
-	//run the command line scraper then quit
-	if(scrape_cmdline)
-	{
-		return run_scraper_cmdline();
-	}
 
 	//dont generate joystick events while we're loading (hopefully fixes "automatically started emulator" bug)
 	SDL_JoystickEventState(SDL_DISABLE);
