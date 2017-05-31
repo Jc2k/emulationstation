@@ -29,10 +29,6 @@ public:
 
     bool setOverclock(std::string mode);
 
-    bool updateLastChangelogFile();
-
-    std::string getChangelog();
-
     std::pair<std::string, int> updateSystem();
 
     bool ping();

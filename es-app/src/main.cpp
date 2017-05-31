@@ -22,7 +22,6 @@
 #include <sstream>
 #include "Locale.h"
 #include <boost/algorithm/string.hpp>
-#include <RecalboxConf.h>
 #include "resources/Font.h"
 #include "RecalboxSystem.h"
 #include "FileSorts.h"
@@ -302,25 +301,10 @@ int main(int argc, char* argv[])
 			}));
 	}
 
-	RecalboxConf* recalboxConf = RecalboxConf::getInstance();
 	RecalboxSystem::getInstance()->getIpAdress();
-	// UPDATED VERSION MESSAGE
-    std::string changelog = RecalboxSystem::getInstance()->getChangelog();
-    if (changelog != "") {
-		std::string message = _("THE SYSTEM IS UP TO DATE:") + "\n" + changelog;
-        window.pushGui(
-                new GuiMsgBoxScroll(
-                        &window,
-						message, _("OK"),
-                        [] {
-                            RecalboxSystem::getInstance()->updateLastChangelogFile();
-                        }, "", nullptr, "", nullptr, ALIGN_LEFT));
-    }
 
 	//dont generate joystick events while we're loading (hopefully fixes "automatically started emulator" bug)
 	SDL_JoystickEventState(SDL_DISABLE);
-
-
 
 	// preload what we can right away instead of waiting for the user to select it
 	// this makes for no delays when accessing content, but a longer startup time

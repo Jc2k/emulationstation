@@ -93,49 +93,6 @@ std::string RecalboxSystem::getVersion() {
     return "";
 }
 
-
-bool RecalboxSystem::updateLastChangelogFile() {
-    std::ostringstream oss;
-    oss << "cp  " << Settings::getInstance()->getString("Changelog").c_str() << " " <<
-        Settings::getInstance()->getString("LastChangelog").c_str();
-    if (system(oss.str().c_str())) {
-        LOG(LogWarning) << "Error executing " << oss.str().c_str();
-        return false;
-    } else {
-        LOG(LogError) << "Last version file updated";
-        return true;
-    }
-}
-
-std::string RecalboxSystem::getChangelog() {
-    std::ostringstream oss;
-    std::string last = Settings::getInstance()->getString("LastChangelog");
-    std::ifstream f(last);
-    if(!f.good()){
-        std::ofstream outfile (last);
-        outfile << " ";
-        outfile.close();
-    }
-    oss << "diff --changed-group-format='%>' --unchanged-group-format='' " <<
-        last.c_str() << " " <<
-        Settings::getInstance()->getString("Changelog").c_str();
-
-    FILE *pipe = popen(oss.str().c_str(), "r");
-    char line[1024];
-
-    if (pipe == NULL) {
-        return "";
-    }
-    std::ostringstream res;
-    while (fgets(line, 1024, pipe)) {
-        res << line;
-    }
-    pclose(pipe);
-
-    return res.str();
-
-}
-
 bool RecalboxSystem::setAudioOutputDevice(std::string device) {
     int commandValue = -1;
     int returnValue = false;
