@@ -13,7 +13,7 @@
 #include "RecalboxConf.h"
 #include "Locale.h"
 
-Window::Window() : mNormalizeNextUpdate(false), mFrameTimeElapsed(0), mFrameCountElapsed(0), mAverageDeltaTime(10), 
+Window::Window() : mNormalizeNextUpdate(false), mFrameTimeElapsed(0), mFrameCountElapsed(0), mAverageDeltaTime(10),
 	mAllowSleep(true), mSleeping(false), mTimeSinceLastInput(0), launchKodi(false)
 {
 	mHelp = new HelpComponent(this);
@@ -28,7 +28,7 @@ Window::~Window()
 	// delete all our GUIs
 	while(peekGui())
 		delete peekGui();
-	
+
 	delete mHelp;
 }
 
@@ -134,30 +134,14 @@ void Window::input(InputConfig* config, Input input)
 		// toggle TextComponent debug view with Ctrl-T
 		Settings::getInstance()->setBool("DebugText", !Settings::getInstance()->getBool("DebugText"));
 	}
-	else
-	{
-            if(config->isMappedTo("x", input) && input.value && !launchKodi && RecalboxConf::getInstance()->get("kodi.enabled") == "1" && RecalboxConf::getInstance()->get("kodi.xbutton") == "1"){
-                launchKodi = true;
-                Window * window = this;
-                this->pushGui(new GuiMsgBox(this, _("DO YOU WANT TO START KODI MEDIA CENTER ?"), _("YES"),
-				[window, this] { 
-                                    if( ! RecalboxSystem::getInstance()->launchKodi(window)) {
-                                        LOG(LogWarning) << "Shutdown terminated with non-zero result!";
-                                    }
-                                    launchKodi = false;
-					    }, _("NO"), [this] {
-                                    launchKodi = false;
-                                }));
-            }else {
-		if(peekGui())
+	else if(peekGui()) {
 			this->peekGui()->input(config, input);
-            }
 	}
 }
 
 void Window::update(int deltaTime)
 {
-    
+
         if(!mMessages.empty()){
 		std::string message = mMessages.back();
 		mMessages.pop_back();
@@ -175,11 +159,11 @@ void Window::update(int deltaTime)
 	if(mFrameTimeElapsed > 500)
 	{
 		mAverageDeltaTime = mFrameTimeElapsed / mFrameCountElapsed;
-		
+
 		if(Settings::getInstance()->getBool("DrawFramerate"))
 		{
 			std::stringstream ss;
-			
+
 			// fps
 			ss << std::fixed << std::setprecision(1) << (1000.0f * (float)mFrameCountElapsed / (float)mFrameTimeElapsed) << "fps, ";
 			ss << std::fixed << std::setprecision(2) << ((float)mFrameTimeElapsed / (float)mFrameCountElapsed) << "ms";
@@ -335,16 +319,16 @@ void Window::setHelpPrompts(const std::vector<HelpPrompt>& prompts, const HelpSt
 
 	// sort prompts so it goes [dpad_all] [dpad_u/d] [dpad_l/r] [a/b/x/y/l/r] [start/select]
 	std::sort(addPrompts.begin(), addPrompts.end(), [](const HelpPrompt& a, const HelpPrompt& b) -> bool {
-		
+
 		static const char* map[] = {
 			"up/down/left/right",
 			"up/down",
 			"left/right",
-			"a", "b", "x", "y", "l", "r", 
-			"start", "select", 
+			"a", "b", "x", "y", "l", "r",
+			"start", "select",
 			NULL
 		};
-		
+
 		int i = 0;
 		int aVal = 0;
 		int bVal = 0;

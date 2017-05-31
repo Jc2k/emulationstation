@@ -91,7 +91,6 @@ void GuiMenu::createInputTextRow(GuiSettings *gui, std::string title, const char
 GuiMenu::GuiMenu(Window *window) : GuiComponent(window), mMenu(window, _("MAIN MENU").c_str()), mVersion(window) {
     // MAIN MENU
 
-    // KODI >
     // ROM MANAGER >
     // SYSTEM >
     // GAMES >
@@ -101,16 +100,7 @@ GuiMenu::GuiMenu(Window *window) : GuiComponent(window), mMenu(window, _("MAIN M
     // NETWORK >
     // SCRAPER >
     // QUIT >
-    if (RecalboxConf::getInstance()->get("kodi.enabled") == "1") {
-      addEntry(_("KODI MEDIA CENTER").c_str(), 0x777777FF, true,
-                 [this] {
-                     Window *window = mWindow;
 
-                     if (!RecalboxSystem::getInstance()->launchKodi(window)) {
-                         LOG(LogWarning) << "Shutdown terminated with non-zero result!";
-                     }
-                 });
-    }
     if (Settings::getInstance()->getBool("RomsManager")) {
       addEntry("ROMS MANAGER", 0x777777FF, true, [this] {
             mWindow->pushGui(new GuiRomsManager(mWindow));
@@ -247,42 +237,6 @@ GuiMenu::GuiMenu(Window *window) : GuiComponent(window), mMenu(window, _("MAIN M
                                                                        0x777777FF);
                          auto bracket = makeArrow(mWindow);
                          row.addElement(update, true);
-                         row.addElement(bracket, false);
-                         s->addRow(row);
-                     }
-
-
-                     //Kodi
-                     {
-                         ComponentListRow row;
-                         std::function<void()> openGui = [this] {
-			   GuiSettings *kodiGui = new GuiSettings(mWindow, _("KODI SETTINGS").c_str());
-                             auto kodiEnabled = std::make_shared<SwitchComponent>(mWindow);
-                             kodiEnabled->setState(RecalboxConf::getInstance()->get("kodi.enabled") == "1");
-			   kodiGui->addWithLabel(_("ENABLE KODI"), kodiEnabled);
-                             auto kodiAtStart = std::make_shared<SwitchComponent>(mWindow);
-                             kodiAtStart->setState(
-                                     RecalboxConf::getInstance()->get("kodi.atstartup") == "1");
-			   kodiGui->addWithLabel(_("KODI AT START"), kodiAtStart);
-                             auto kodiX = std::make_shared<SwitchComponent>(mWindow);
-                             kodiX->setState(RecalboxConf::getInstance()->get("kodi.xbutton") == "1");
-			   kodiGui->addWithLabel(_("START KODI WITH X"), kodiX);
-                             kodiGui->addSaveFunc([kodiEnabled, kodiAtStart, kodiX] {
-                                 RecalboxConf::getInstance()->set("kodi.enabled",
-                                                                  kodiEnabled->getState() ? "1" : "0");
-                                 RecalboxConf::getInstance()->set("kodi.atstartup",
-                                                                  kodiAtStart->getState() ? "1" : "0");
-                                 RecalboxConf::getInstance()->set("kodi.xbutton",
-                                                                  kodiX->getState() ? "1" : "0");
-                                 RecalboxConf::getInstance()->saveRecalboxConf();
-                             });
-                             mWindow->pushGui(kodiGui);
-                         };
-                         row.makeAcceptInputHandler(openGui);
-                         auto kodiSettings = std::make_shared<TextComponent>(mWindow, _("KODI SETTINGS"),
-                                                                             Font::get(FONT_SIZE_MEDIUM), 0x777777FF);
-                         auto bracket = makeArrow(mWindow);
-                         row.addElement(kodiSettings, true);
                          row.addElement(bracket, false);
                          s->addRow(row);
                      }

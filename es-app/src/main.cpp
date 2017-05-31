@@ -288,8 +288,7 @@ int main(int argc, char* argv[])
 		if(errorMsg == NULL)
 		{
 			LOG(LogError) << "Unknown error occured while parsing system config file.";
-			if(!scrape_cmdline)
-				Renderer::deinit();
+			Renderer::deinit();
 			return 1;
 		}
 
@@ -304,9 +303,6 @@ int main(int argc, char* argv[])
 	}
 
 	RecalboxConf* recalboxConf = RecalboxConf::getInstance();
-	if(recalboxConf->get("kodi.enabled") == "1" && recalboxConf->get("kodi.atstartup") == "1"){
-		RecalboxSystem::getInstance()->launchKodi(&window);
-	}
 	RecalboxSystem::getInstance()->getIpAdress();
 	// UPDATED VERSION MESSAGE
     std::string changelog = RecalboxSystem::getInstance()->getChangelog();

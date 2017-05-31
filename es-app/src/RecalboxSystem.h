@@ -22,7 +22,7 @@ public:
 
     std::string getVersion();
     std::string getRootPassword();
-    
+
     bool setAudioOutputDevice(std::string device);
 
     bool setOverscan(bool enable);
@@ -38,8 +38,6 @@ public:
     bool ping();
 
     bool canUpdate();
-
-    bool launchKodi(Window *window);
 
     bool enableWifi(std::string ssid, std::string key);
 
@@ -77,4 +75,3 @@ private:
 };
 
 #endif
-

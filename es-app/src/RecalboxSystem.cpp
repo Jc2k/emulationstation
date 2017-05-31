@@ -1,7 +1,7 @@
 /*
  * File:   RecalboxSystem.cpp
  * Author: digitallumberjack
- * 
+ *
  * Created on 29 novembre 2014, 03:15
  */
 
@@ -245,45 +245,6 @@ bool RecalboxSystem::canUpdate() {
         LOG(LogInfo) << "Cannot update ";
         return false;
     }
-}
-
-bool RecalboxSystem::launchKodi(Window *window) {
-
-    LOG(LogInfo) << "Attempting to launch kodi...";
-
-
-    AudioManager::getInstance()->deinit();
-    VolumeControl::getInstance()->deinit();
-
-    std::string commandline = InputManager::getInstance()->configureEmulators();
-    std::string command = "configgen -system kodi -rom '' " + commandline;
-
-    window->deinit();
-
-    int exitCode = system(command.c_str());
-    if (WIFEXITED(exitCode)) {
-        exitCode = WEXITSTATUS(exitCode);
-    }
-
-    window->init();
-    VolumeControl::getInstance()->init();
-    AudioManager::getInstance()->resumeMusic();
-    window->normalizeNextUpdate();
-
-    // handle end of kodi
-    switch (exitCode) {
-        case 10: // reboot code
-            reboot();
-            return true;
-            break;
-        case 11: // shutdown code
-            shutdown();
-            return true;
-            break;
-    }
-
-    return exitCode == 0;
-
 }
 
 bool RecalboxSystem::enableWifi(std::string ssid, std::string key) {
