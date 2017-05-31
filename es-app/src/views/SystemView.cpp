@@ -106,7 +106,7 @@ void SystemView::populate()
   mFavoriteData = new FavoriteData("Favourites", "", "favorites", &SystemData::sSystemVector);
   addSystem(mFavoriteData);
 
-  mLobbyData = new LobbyData();
+  mLobbyData = new LobbyData(&SystemData::sSystemVector);
   addSystem(mLobbyData);
 }
 

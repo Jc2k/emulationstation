@@ -79,13 +79,13 @@ private:
 
 	void playViewTransition();
 	int getSystemId(SystemData* system);
-	
+
 	std::shared_ptr<GuiComponent> mCurrentView;
 	std::map< SystemData*, std::shared_ptr<IGameListView> > mGameListViews;
 	std::shared_ptr<SystemView> mSystemListView;
 
 	std::map<SystemData*, bool> mInvalidGameList;
-	
+
 	Eigen::Affine3f mCamera;
 	float mFadeOpacity;
 	bool mLockInput;

@@ -528,16 +528,5 @@ HelpStyle ViewController::getHelpStyle()
 }
 
 int ViewController::getFirstSystemIndex() {
-	std::string systemName = RecalboxConf::getInstance()->get("system.es.selectedsystem");
-	if(systemName != ""){
-		int index = SystemData::getSystemIndex(systemName);
-		if (index != -1){
-			LOG(LogInfo) << "system.es.selectedsystem variable set to " << systemName.c_str() << " system found !";
-			return index;
-		}else {
-			LOG(LogWarning) << "system.es.selectedsystem variable set to " << systemName.c_str() << " but unable to find such a system.";
-			return 0;
-		}
-	}
 	return 0;
 }
