@@ -398,22 +398,6 @@ bool SystemData::loadConfig()
 	ioService.stop();
 	threadpool.join_all();
 
-	// Favorite system
-	for(pugi::xml_node system = systemList.child("system"); system; system = system.next_sibling("system")) {
-
-		std::string name = system.child("name").text().get();
-		std::string fullname = system.child("fullname").text().get();
-		std::string cmd = system.child("command").text().get();
-		std::string themeFolder = system.child("theme").text().as_string(name.c_str());
-
-		if (name == "favorites") {
-			LOG(LogInfo) << "creating favorite system";
-			FavoriteData *newSys = new FavoriteData(fullname, cmd, themeFolder, &sSystemVector);
-			sSystemVector.push_back(newSys);
-		}
-	}
-
-
 	return true;
 }
 

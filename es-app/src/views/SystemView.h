@@ -6,6 +6,8 @@
 #include "components/ScrollableContainer.h"
 #include "components/IList.h"
 #include "resources/TextureResource.h"
+#include "FavoriteData.h"
+#include "LobbyData.h"
 
 class SystemData;
 class AnimatedImageComponent;
@@ -42,6 +44,8 @@ protected:
 private:
 	inline Eigen::Vector2f logoSize() const { return Eigen::Vector2f(mSize.x() * 0.25f, mSize.y() * 0.155f); }
 
+	FavoriteData *mFavoriteData;
+	LobbyData *mLobbyData;
 
 	TextComponent mSystemInfo;
 

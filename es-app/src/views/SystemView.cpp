@@ -17,6 +17,7 @@
 #include "AudioManager.h"
 #include "Locale.h"
 #include "LobbyData.h"
+#include "FavoriteData.h"
 
 
 #define SELECTED_SCALE 1.5f
@@ -102,7 +103,11 @@ void SystemView::populate()
 		addSystem((*it));
 	}
 
-	addSystem(new LobbyData());
+  mFavoriteData = new FavoriteData("Favourites", "", "favorites", &SystemData::sSystemVector);
+  addSystem(mFavoriteData);
+
+  mLobbyData = new LobbyData();
+  addSystem(mLobbyData);
 }
 
 void SystemView::goToSystem(SystemData* system, bool animate)
@@ -391,14 +396,14 @@ void SystemView::manageFavorite(){
 		if(it->object->isFavorite()){
 			hasFavorite = true;
 		}
-	SystemData *favorite = SystemData::getFavoriteSystem();
+
 	if(hasFavorite) {
-		if (favorite->getFavoritesCount() == 0) {
-			removeSystem(favorite);
+		if (mFavoriteData->getFavoritesCount() == 0) {
+			removeSystem(mFavoriteData);
 		}
 	}else {
-		if (favorite->getFavoritesCount() > 0) {
-			addSystem(favorite);
+		if (mFavoriteData->getFavoritesCount() > 0) {
+			addSystem(mFavoriteData);
 		}
 	}
 }
