@@ -20,7 +20,6 @@
 #include "guis/GuiSettings.h"
 #include "guis/GuiScraperStart.h"
 #include "guis/GuiDetectDevice.h"
-#include "guis/GuiUpdate.h"
 #include "guis/GuiRomsManager.h"
 #include "views/ViewController.h"
 #include "AudioManager.h"
@@ -199,47 +198,6 @@ GuiMenu::GuiMenu(Window *window) : GuiComponent(window), mMenu(window, _("MAIN M
                      overclock_choice->add(_("NONE"), "none", true);
 #endif
                      s->addWithLabel(_("OVERCLOCK"), overclock_choice);
-
-                     // Updates
-                     {
-                         ComponentListRow row;
-                         std::function<void()> openGuiD = [this] {
-			   GuiSettings *updateGui = new GuiSettings(mWindow, _("UPDATES").c_str());
-                             // Enable updates
-                             auto updates_enabled = std::make_shared<SwitchComponent>(mWindow);
-                             updates_enabled->setState(
-                                     RecalboxConf::getInstance()->get("updates.enabled") == "1");
-			   updateGui->addWithLabel(_("AUTO UPDATES"), updates_enabled);
-
-                             // Start update
-                             {
-                                 ComponentListRow updateRow;
-                                 std::function<void()> openGui = [this] { mWindow->pushGui(new GuiUpdate(mWindow)); };
-                                 updateRow.makeAcceptInputHandler(openGui);
-                                 auto update = std::make_shared<TextComponent>(mWindow, _("START UPDATE"),
-                                                                               Font::get(FONT_SIZE_MEDIUM),
-                                                                               0x777777FF);
-                                 auto bracket = makeArrow(mWindow);
-                                 updateRow.addElement(update, true);
-                                 updateRow.addElement(bracket, false);
-                                 updateGui->addRow(updateRow);
-                             }
-                             updateGui->addSaveFunc([updates_enabled] {
-                                 RecalboxConf::getInstance()->set("updates.enabled",
-                                                                  updates_enabled->getState() ? "1" : "0");
-                                 RecalboxConf::getInstance()->saveRecalboxConf();
-                             });
-                             mWindow->pushGui(updateGui);
-
-                         };
-                         row.makeAcceptInputHandler(openGuiD);
-                         auto update = std::make_shared<TextComponent>(mWindow, _("UPDATES"), Font::get(FONT_SIZE_MEDIUM),
-                                                                       0x777777FF);
-                         auto bracket = makeArrow(mWindow);
-                         row.addElement(update, true);
-                         row.addElement(bracket, false);
-                         s->addRow(row);
-                     }
 
                      //Security
                      {
