@@ -533,15 +533,6 @@ std::map<std::string, std::vector<std::string>*>* SystemData::getEmulators() {
 	return mEmulators;
 }
 
-SystemData* SystemData::getFavoriteSystem() {
-	for(auto system = sSystemVector.begin(); system != sSystemVector.end(); system ++){
-		if((*system)->isFavorite()){
-			return (*system);
-		}
-	}
-	return NULL;
-}
-
 int SystemData::getSystemIndex(std::string name) {
     int index = 0;
 	for(auto system = sSystemVector.begin(); system != sSystemVector.end(); system ++){
