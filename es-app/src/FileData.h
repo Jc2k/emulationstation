@@ -41,7 +41,7 @@ public:
 	inline FileData* getParent() const { return mParent; }
 	inline const std::vector<FileData*>& getChildren() const { return mChildren; }
 	inline SystemData* getSystem() const { return mSystem; }
-	
+
 	virtual const std::string& getThumbnailPath() const;
 
 	std::vector<FileData*> getFilesRecursive(unsigned int typeMask) const;
@@ -67,7 +67,7 @@ public:
 		bool ascending;
 		std::string description;
 
-		SortType(ComparisonFunction* sortFunction, bool sortAscending, const std::string & sortDescription) 
+		SortType(ComparisonFunction* sortFunction, bool sortAscending, const std::string & sortDescription)
 			: comparisonFunction(sortFunction), ascending(sortAscending), description(sortDescription) {}
 	};
 
@@ -76,6 +76,8 @@ public:
 
 	static void populateFolder(FileData* folder, const std::vector<std::string>& searchExtensions = std::vector<std::string>(), SystemData* systemData = nullptr);
 	static void populateRecursiveFolder(FileData* folder, const std::vector<std::string>& searchExtensions = std::vector<std::string>(), SystemData* systemData = nullptr);
+
+	void updateMd5Hash();
 
 	MetaDataList metadata;
 

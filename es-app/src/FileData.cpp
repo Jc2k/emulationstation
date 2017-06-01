@@ -1,3 +1,5 @@
+#include <openssl/md5.h>
+
 #include "FileData.h"
 #include "SystemData.h"
 #include "Log.h"
@@ -54,6 +56,8 @@ FileData::FileData(FileType type, const fs::path& path, SystemData* system)
 	if(metadata.get("name").empty())
 		metadata.set("name", getCleanName());
 	metadata.set("system", system->getName());
+
+	updateMd5Hash();
 }
 
 FileData::~FileData()
@@ -62,6 +66,46 @@ FileData::~FileData()
 		mParent->removeChild(this);
 
 	clear();
+}
+
+void FileData::updateMd5Hash() {
+	MD5_CTX context;
+	MD5_Init(&context);
+
+	FILE *fp = fopen(mPath.c_str(), "rb");
+	if (fp == NULL) {
+		printf ("%s can't be opened.\n", mPath.c_str());
+		return;
+	}
+
+	int bytes = 0;
+	unsigned char data[1024];
+	while ((bytes = fread(data, 1, 1024, fp)) != 0)
+			MD5_Update(&context, data, bytes);
+
+	fclose(fp);
+
+	unsigned char digest[MD5_DIGEST_LENGTH];
+	MD5_Final(digest, &context);
+
+	for (int i = 0; i < MD5_DIGEST_LENGTH; i++)
+	  printf("%02x", digest[i]);
+	printf (" %s\n", mPath.c_str());
+
+	static const char hexchars[] = "0123456789abcdef";
+	std::string result;
+	for (int i = 0; i < MD5_DIGEST_LENGTH; i++) {
+    unsigned char b = digest[i];
+    char hex[3];
+
+    hex[0] = hexchars[b >> 4];
+    hex[1] = hexchars[b & 0xF];
+    hex[2] = 0;
+
+    result.append(hex);
+	}
+
+	metadata.set("hash", result);
 }
 
 std::string FileData::getCleanName() const
@@ -90,7 +134,7 @@ std::vector<FileData*> FileData::getFilesRecursive(unsigned int typeMask) const
 	{
 		if((*it)->getType() & typeMask)
 			out.push_back(*it);
-		
+
 		if((*it)->getChildren().size() > 0)
 		{
 			std::vector<FileData*> subchildren = (*it)->getFilesRecursive(typeMask);

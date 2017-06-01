@@ -13,6 +13,9 @@ public:
   bool allowFavoriting() const override;
 
 private:
+  void addPlayer(std::string gameHash);
+  void removePlayer(std::string gameHash);
+
   std::vector<SystemData*>* msystems;
   void refreshRootFolder();
   void onLobbyChange();

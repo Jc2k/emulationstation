@@ -36,7 +36,7 @@ SystemData::SystemData(std::string name, std::string fullName, std::string theme
 	mRootFolder = new FileData(FOLDER, mStartPath, this);
 	mRootFolder->metadata.set("name", mFullName);
 
-	mIsFavorite = true;
+	mIsFavorite = false;
 	mPlatformIds.push_back(PlatformIds::PLATFORM_IGNORE);
 
 	loadTheme();
@@ -111,12 +111,7 @@ SystemData::SystemData(std::string name, std::string fullName, std::string comma
 
 SystemData::~SystemData()
 {
-	//save changed game data back to xml
-	if(!Settings::getInstance()->getBool("IgnoreGamelist"))
-	{
-		updateGamelist(this);
-	}
-
+	updateGamelist(this);
 	delete mRootFolder;
 }
 
@@ -175,7 +170,7 @@ void SystemData::launchGame(Window* window, FileData* game)
 	LOG(LogInfo) << "Controllers config : " << controlersConfig;
 	window->deinit();
 
-  LobbyThread::getInstance()->startBroadcast(std::string("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
+  LobbyThread::getInstance()->startBroadcast(game->metadata.get("hash"));
 
 	std::string command = mLaunchCommand;
 
