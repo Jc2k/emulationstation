@@ -2,6 +2,16 @@
 
 #include <boost/thread.hpp>
 
+struct Session {
+public:
+	std::string peer;
+	std::string gameHash;
+};
+
+typedef std::function<void(Session *session)> PlayerStartedPlayingFunction;
+typedef std::function<void(Session *session)> PlayerStoppedPlayingFunction;
+
+
 class LobbyThread {
 public:
 	LobbyThread();
@@ -10,9 +20,17 @@ public:
 	void startBroadcast(std::string gameHash);
 	void stopBroadcast();
 
+	void subscribeStartedPlaying(PlayerStartedPlayingFunction callback);
+	void subscribeStoppedPlaying(PlayerStoppedPlayingFunction callback);
+
   static LobbyThread *getInstance();
 private:
   static LobbyThread *instance;
+
+
+	std::map<std::string, Session*> mActiveSessions;
+	std::vector<PlayerStartedPlayingFunction> mStartedPlayingCallbacks;
+	std::vector<PlayerStoppedPlayingFunction> mStoppedPlayingCallbacks;
 
 	boost::thread *mThreadHandle;
 	std::string m_gameHash;

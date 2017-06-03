@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SystemData.h"
+#include "Lobby.h"
 
 
 class LobbyData : public SystemData
@@ -13,10 +14,11 @@ public:
   bool allowFavoriting() const override;
 
 private:
-  void addPlayer(std::string gameHash);
-  void removePlayer(std::string gameHash);
+  void addPlayer(Session *session);
+  void removePlayer(Session *session);
 
   std::vector<SystemData*>* msystems;
+
   void refreshRootFolder();
   void onLobbyChange();
 };

@@ -128,6 +128,14 @@ void LobbyThread::stopBroadcast() {
 	}
 }
 
+void LobbyThread::subscribeStartedPlaying(PlayerStartedPlayingFunction callback) {
+  mStartedPlayingCallbacks.push_back(callback);
+}
+
+void LobbyThread::subscribeStoppedPlaying(PlayerStoppedPlayingFunction callback) {
+  mStoppedPlayingCallbacks.push_back(callback);
+}
+
 void LobbyThread::handleTimeout() {
 	std::cerr << "TIME TO BROADCAST" << std::endl;
 
@@ -145,6 +153,19 @@ void LobbyThread::handleTimeout() {
 
 void LobbyThread::handleIncomingBroadcast(std::string gameHash, std::string peer) {
 		std::cerr << "SAW ANNOUNCEMENT FROM GAME" << gameHash << peer << std::endl;
+
+    auto it = mActiveSessions.find(peer);
+    if (it != mActiveSessions.end())
+      return;
+
+    auto session = new Session();
+    session->gameHash = gameHash;
+    session->peer = peer;
+    mActiveSessions[peer] = session;
+
+    for(auto it = mStartedPlayingCallbacks.begin(); it != mStartedPlayingCallbacks.end(); it++) {
+      (*it)(session);
+    }
 }
 
 void LobbyThread::run() {
