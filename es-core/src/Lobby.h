@@ -1,11 +1,15 @@
 #pragma once
 
+#include <time.h>
+
 #include <boost/thread.hpp>
+
 
 struct Session {
 public:
 	std::string peer;
 	std::string gameHash;
+	timespec lastSeen;
 };
 
 typedef std::function<void(Session *session)> PlayerStartedPlayingFunction;
@@ -35,8 +39,11 @@ private:
 	boost::thread *mThreadHandle;
 	std::string m_gameHash;
 	int mefd;
+	int mexpireFd;
 	int mtfd;
 	int m_broadcast_fd;
+
+	void expireSessions();
 	void handleTimeout();
 	void handleIncomingBroadcast(std::string gameHash, std::string peer);
 	void run();

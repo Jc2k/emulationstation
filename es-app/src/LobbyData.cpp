@@ -30,6 +30,7 @@ void LobbyData::addPlayer(Session *session) {
 }
 
 void LobbyData::removePlayer(Session *session) {
+  std::cerr << "/* removePlayer */" << '\n';
   /*std::vector<FileData*> games = mRootFolder->getFilesRecursive(GAME);
   for(auto game = games.begin(); game != games.end(); game++) {
     if ((*game)->metadata.get("hash").compare(gameHash) == 0) {

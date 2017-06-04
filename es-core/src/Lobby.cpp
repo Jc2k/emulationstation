@@ -53,8 +53,9 @@ LobbyThread::LobbyThread() {
 		exit(1);
 	}
 
-	mtfd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
-	if (mtfd < 0) {
+  // Expire old sessions after 5 seconds
+  mexpireFd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
+	if (mexpireFd < 0) {
 		std::cerr << "timerfd_create error: " << strerror(errno) << std::endl;
 		exit(1);
 	}
@@ -62,9 +63,22 @@ LobbyThread::LobbyThread() {
 	struct epoll_event ev;
 	memset(&ev, 0, sizeof(epoll_event));
 	ev.events = EPOLLIN | EPOLLERR | EPOLLET;
+	ev.data.fd = mexpireFd;
+	epoll_ctl(mefd, EPOLL_CTL_ADD, mexpireFd, &ev);
+
+  // Tell other players when we are playing a game
+	mtfd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
+	if (mtfd < 0) {
+		std::cerr << "timerfd_create error: " << strerror(errno) << std::endl;
+		exit(1);
+	}
+
+	memset(&ev, 0, sizeof(epoll_event));
+	ev.events = EPOLLIN | EPOLLERR | EPOLLET;
 	ev.data.fd = mtfd;
 	epoll_ctl(mefd, EPOLL_CTL_ADD, mtfd, &ev);
 
+  // Broadcast / receive broadcasts over udp
 	m_broadcast_fd = socket(AF_INET, SOCK_DGRAM, 0);
 	if (m_broadcast_fd == -1) {
 		std::cerr << "socket error: " << strerror(errno) << std::endl;
@@ -136,6 +150,27 @@ void LobbyThread::subscribeStoppedPlaying(PlayerStoppedPlayingFunction callback)
   mStoppedPlayingCallbacks.push_back(callback);
 }
 
+void LobbyThread::expireSessions() {
+  timespec currentTime;
+  clock_gettime(CLOCK_MONOTONIC, &currentTime);
+
+  for (auto it = mActiveSessions.begin(); it!=mActiveSessions.end(); it++) {
+    if ((currentTime.tv_sec - (*it).second->lastSeen.tv_sec) > 5) {
+      for(auto callback = mStoppedPlayingCallbacks.begin(); callback != mStoppedPlayingCallbacks.end(); callback++) {
+        (*callback)((*it).second);
+      }
+      mActiveSessions.erase(it);
+    }
+  }
+
+  if (mActiveSessions.size() == 0) {
+    itimerspec new_timeout{{0}};
+    if (timerfd_settime(mexpireFd, 0, &new_timeout, NULL) != 0) {
+      std::cerr << "timerfd_settime error: " << strerror(errno) << std::endl;
+    }
+  }
+}
+
 void LobbyThread::handleTimeout() {
 	std::cerr << "TIME TO BROADCAST" << std::endl;
 
@@ -155,16 +190,31 @@ void LobbyThread::handleIncomingBroadcast(std::string gameHash, std::string peer
 		std::cerr << "SAW ANNOUNCEMENT FROM GAME" << gameHash << peer << std::endl;
 
     auto it = mActiveSessions.find(peer);
-    if (it != mActiveSessions.end())
+    if (it != mActiveSessions.end()) {
+      clock_gettime(CLOCK_MONOTONIC, &(*it).second->lastSeen);
       return;
+    }
 
     auto session = new Session();
     session->gameHash = gameHash;
     session->peer = peer;
+    clock_gettime(CLOCK_MONOTONIC, &session->lastSeen);
     mActiveSessions[peer] = session;
 
     for(auto it = mStartedPlayingCallbacks.begin(); it != mStartedPlayingCallbacks.end(); it++) {
       (*it)(session);
+    }
+
+    // Configure session to expire
+    // FIXME: Is this too agressive?
+    struct itimerspec new_timeout;
+    new_timeout.it_value.tv_sec = 1;
+    new_timeout.it_value.tv_nsec = 0;
+    new_timeout.it_interval.tv_sec = 1;
+    new_timeout.it_interval.tv_nsec = 0;
+
+    if (timerfd_settime(mexpireFd, 0, &new_timeout, NULL) != 0) {
+      std::cerr << "timerfd_settime error: " << strerror(errno) << std::endl;
     }
 }
 
@@ -175,6 +225,9 @@ void LobbyThread::run() {
 	while (1) {
 		numEvents = epoll_wait(mefd, events, 128, -1);
 		if (numEvents < 0) {
+      if (errno == EINTR)
+        continue;
+
 			std::cerr << "An error occured: " << strerror(errno) << std::endl;
 			return;
 		}
@@ -186,6 +239,13 @@ void LobbyThread::run() {
 				read(mtfd, &data, 8);
 				lseek(mtfd, 0, SEEK_SET);
 				this->handleTimeout();
+			}
+
+      if (events[i].data.fd == mexpireFd) {
+				char data[8];
+				read(mexpireFd, &data, 8);
+				lseek(mexpireFd, 0, SEEK_SET);
+				this->expireSessions();
 			}
 
 			if (events[i].data.fd == m_broadcast_fd) {
