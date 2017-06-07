@@ -20,6 +20,7 @@ void LobbyData::addPlayer(Session *session) {
     std::vector<FileData*> games = (*system)->getRootFolder()->getFilesRecursive(GAME);
     for(auto game = games.begin(); game != games.end(); game++) {
       if ((*game)->metadata.get("hash").compare(session->gameHash) == 0) {
+        // FIXME: A clone won't get metadata updates from its parent!
         auto clone = (*game)->clone();
         clone->metadata.set("peer", session->peer);
         mRootFolder->addChild(clone);
