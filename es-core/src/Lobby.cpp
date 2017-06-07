@@ -85,9 +85,15 @@ LobbyThread::LobbyThread() {
 		exit(1);
 	}
 
+  int reuse = 1;
+	if((setsockopt(m_broadcast_fd, SOL_SOCKET, SO_REUSEPORT, &reuse, sizeof(reuse))) == -1) {
+		std::cerr << "setsockopt SO_REUSEPORT error: " << strerror(errno) << std::endl;
+		exit(1);
+	}
+
 	int broadcast = 1;
 	if((setsockopt(m_broadcast_fd, SOL_SOCKET, SO_BROADCAST, &broadcast, sizeof(broadcast))) == -1) {
-		std::cerr << "setsockopt SOL_SOCKET error: " << strerror(errno) << std::endl;
+		std::cerr << "setsockopt SO_BROADCAST error: " << strerror(errno) << std::endl;
 		exit(1);
 	}
 	make_socket_non_blocking(m_broadcast_fd);

@@ -68,6 +68,12 @@ FileData::~FileData()
 	clear();
 }
 
+FileData * FileData::clone() {
+	auto clone = new FileData(mType, mPath, mSystem);
+	clone->metadata.merge(metadata);
+	return clone;
+}
+
 void FileData::updateMd5Hash() {
 	MD5_CTX context;
 	MD5_Init(&context);

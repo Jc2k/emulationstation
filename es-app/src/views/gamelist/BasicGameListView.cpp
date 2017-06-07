@@ -212,7 +212,9 @@ void BasicGameListView::populateList(const std::vector<FileData*>& files)
 
 FileData* BasicGameListView::getCursor()
 {
-	return mList.getSelected();
+	if (!isEmpty())
+		return mList.getSelected();
+	return NULL;
 }
 
 void BasicGameListView::setCursorIndex(int cursor){

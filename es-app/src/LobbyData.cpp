@@ -20,24 +20,29 @@ void LobbyData::addPlayer(Session *session) {
     std::vector<FileData*> games = (*system)->getRootFolder()->getFilesRecursive(GAME);
     for(auto game = games.begin(); game != games.end(); game++) {
       if ((*game)->metadata.get("hash").compare(session->gameHash) == 0) {
-        // FIXME: Really we want to clone the FileData so that the Lobby can store remote player ip etc on it
-        // If we don't ephemeral multiplayer related data will end up in gamelist.xml
-        mRootFolder->addAlreadyExisitingChild((*game));
+        auto clone = (*game)->clone();
+        clone->metadata.set("peer", session->peer);
+        mRootFolder->addChild(clone);
       }
     }
   }
   mRootFolder->sort(FileSorts::SortTypes.at(0));
+
+  ViewController::get()->reloadGameListView(this);
 }
 
 void LobbyData::removePlayer(Session *session) {
   std::cerr << "/* removePlayer */" << '\n';
-  /*std::vector<FileData*> games = mRootFolder->getFilesRecursive(GAME);
+  std::vector<FileData*> games = mRootFolder->getFilesRecursive(GAME);
   for(auto game = games.begin(); game != games.end(); game++) {
-    if ((*game)->metadata.get("hash").compare(gameHash) == 0) {
+    std::cerr << (*game)->metadata.get("peer") << std::endl;
+    if ((*game)->metadata.get("peer").compare(session->peer) == 0) {
       mRootFolder->removeAlreadyExisitingChild((*game));
     }
   }
-  mRootFolder->sort(FileSorts::SortTypes.at(0));*/
+  mRootFolder->sort(FileSorts::SortTypes.at(0));
+
+  ViewController::get()->reloadGameListView(this);
 }
 
 bool LobbyData::hasAnyThumbnails() const {

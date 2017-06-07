@@ -410,17 +410,14 @@ void ViewController::reloadGameListView(IGameListView* view, bool reloadTheme)
 		{
 			bool isCurrent = (mCurrentView == it->second);
 			SystemData* system = it->first;
-			FileData * cursor = NULL;
-			if(system->getGameCount() != 0) {
-				cursor = view->getCursor();
-			}
+			FileData* cursor = view->getCursor();
 			mGameListViews.erase(it);
 
 			if(reloadTheme)
 				system->loadTheme();
 
 			std::shared_ptr<IGameListView> newView = getGameListView(system);
-			if(system->getGameCount() > 1) {
+			if(cursor != NULL) {
 				newView->setCursor(cursor);
 			}else if(system->getGameCount() == 1){
 				newView->setCursor(system->getRootFolder()->getChildren().at(0));

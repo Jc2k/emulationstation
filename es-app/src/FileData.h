@@ -51,6 +51,7 @@ public:
 	void addChild(FileData* file); // Error if mType != FOLDER
 	void removeChild(FileData* file); //Error if mType != FOLDER
 
+	FileData *clone();
 	void addAlreadyExisitingChild(FileData *file);
 	void removeAlreadyExisitingChild(FileData *file);
 
