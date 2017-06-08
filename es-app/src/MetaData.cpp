@@ -31,6 +31,7 @@ void initMetadata() {
   gameMDD.push_back(MetaDataDecl("hidden",	MD_BOOL,		"false",		false,		_("Hidden"),			_("set hidden")));
 
   gameMDD.push_back(MetaDataDecl("hash",	MD_STRING,		"", 			true,		_("Name"),			_("enter game md5 hash")));
+  gameMDD.push_back(MetaDataDecl("peer",	MD_STRING,		"", 			true,		_("Name"),			_("ip address of a server playing this game")));
 
   gameMDD.push_back(MetaDataDecl("playcount",	MD_INT,			"0",			true,		_("Play count"),		_("enter number of times played")));
   gameMDD.push_back(MetaDataDecl("lastplayed",	MD_TIME,		"0", 			true,		_("Last played"),		_("enter last played date")));

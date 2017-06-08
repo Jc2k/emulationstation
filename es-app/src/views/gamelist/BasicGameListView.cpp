@@ -256,7 +256,7 @@ void BasicGameListView::setCursor(FileData* cursor)
 
 void BasicGameListView::launch(FileData* game)
 {
-	ViewController::get()->launch(game);
+	ViewController::get()->launch(getRoot()->getSystem(), game);
 }
 
 std::vector<HelpPrompt> BasicGameListView::getHelpPrompts()

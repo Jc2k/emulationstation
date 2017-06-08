@@ -161,42 +161,54 @@ std::string escapePath(const boost::filesystem::path& path)
 #endif
 }
 
+std::string SystemData::getLaunchCommandForGame(FileData *game) {
+  std::string command;
+  if (!game->metadata.get("peer").empty())
+    command = game->getSystem()->mJoinCommand;
+  else
+    command = game->getSystem()->mLaunchCommand;
+
+  const std::string rom = escapePath(game->getPath());
+  command = strreplace(command, "%ROM%", rom);
+
+  const std::string controlersConfig = InputManager::getInstance()->configureEmulators();
+  LOG(LogInfo) << "Controllers config : " << controlersConfig;
+  command = strreplace(command, "%CONTROLLERSCONFIG%", controlersConfig);
+
+  const std::string basename = game->getPath().stem().string();
+  command = strreplace(command, "%BASENAME%", basename);
+
+  const std::string rom_raw = fs::path(game->getPath()).make_preferred().string();
+  command = strreplace(command, "%ROM_RAW%", rom_raw);
+
+  command = strreplace(command, "%SYSTEM%", game->metadata.get("system"));
+  command = strreplace(command, "%EMULATOR%", game->metadata.get("emulator"));
+  command = strreplace(command, "%CORE%", game->metadata.get("core"));
+  command = strreplace(command, "%RATIO%", game->metadata.get("ratio"));
+  command = strreplace(command, "%PEER%", game->metadata.get("peer"));
+
+  return command;
+}
+
 void SystemData::launchGame(Window* window, FileData* game)
 {
 	LOG(LogInfo) << "Attempting to launch game...";
 
-
 	AudioManager::getInstance()->deinit();
 	VolumeControl::getInstance()->deinit();
 
-    std::string controlersConfig = InputManager::getInstance()->configureEmulators();
-	LOG(LogInfo) << "Controllers config : " << controlersConfig;
 	window->deinit();
 
   LobbyThread::getInstance()->startBroadcast(game->metadata.get("hash"));
 
-	std::string command = mLaunchCommand;
-
-	const std::string rom = escapePath(game->getPath());
-	const std::string basename = game->getPath().stem().string();
-	const std::string rom_raw = fs::path(game->getPath()).make_preferred().string();
-
-	command = strreplace(command, "%ROM%", rom);
-	command = strreplace(command, "%CONTROLLERSCONFIG%", controlersConfig);
-	command = strreplace(command, "%SYSTEM%", game->metadata.get("system"));
-	command = strreplace(command, "%BASENAME%", basename);
-	command = strreplace(command, "%ROM_RAW%", rom_raw);
-	command = strreplace(command, "%EMULATOR%", game->metadata.get("emulator"));
-	command = strreplace(command, "%CORE%", game->metadata.get("core"));
-	command = strreplace(command, "%RATIO%", game->metadata.get("ratio"));
-
+  std::string command = getLaunchCommandForGame(game);
 	LOG(LogInfo) << "	" << command;
+
 	std::cout << "==============================================\n";
 	int exitCode = runSystemCommand(command);
 	std::cout << "==============================================\n";
 
-	if(exitCode != 0)
-	{
+	if(exitCode != 0){
 		LOG(LogWarning) << "...launch terminated with nonzero exit code " << exitCode << "!";
 	}
 

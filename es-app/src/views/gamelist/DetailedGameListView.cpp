@@ -280,8 +280,7 @@ void DetailedGameListView::launch(FileData* game)
 	Eigen::Vector3f target(Renderer::getScreenWidth() / 2.0f, Renderer::getScreenHeight() / 2.0f, 0);
 	if(mImage.hasImage())
 		target << mImage.getCenter().x(), mImage.getCenter().y(), 0;
-
-	ViewController::get()->launch(game, target);
+	ViewController::get()->launch(getRoot()->getSystem(), game, target);
 }
 
 std::vector<TextComponent*> DetailedGameListView::getMDLabels()

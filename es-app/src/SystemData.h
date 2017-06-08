@@ -81,6 +81,7 @@ public:
 	// refresh the roms files
 	void refreshRootFolder();
 
+	std::string getLaunchCommandForGame(FileData *game);
 
 	std::map<std::string, std::vector<std::string> *> * getEmulators();
 
