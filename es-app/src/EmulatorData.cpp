@@ -2,10 +2,11 @@
 
 EmulatorData::EmulatorData(std::string name, std::string fullName, std::string startPath,
                            std::vector<std::string> extensions, std::string command,
+                           std::string hostCommand, std::string joinCommand,
                            std::vector<PlatformIds::PlatformId> platformIds, std::string themeFolder,
                            std::map<std::string, std::vector<std::string>*>* emulators) :
 
-  SystemData(name, fullName, startPath, extensions, command, platformIds, themeFolder, emulators)
+  SystemData(name, fullName, startPath, extensions, command, hostCommand, joinCommand, platformIds, themeFolder, emulators)
 {
 
 

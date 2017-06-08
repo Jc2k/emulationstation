@@ -44,6 +44,7 @@ SystemData::SystemData(std::string name, std::string fullName, std::string theme
 
 SystemData::SystemData(std::string name, std::string fullName, std::string startPath,
                            std::vector<std::string> extensions, std::string command,
+                           std::string hostCommand, std::string joinCommand,
                            std::vector<PlatformIds::PlatformId> platformIds, std::string themeFolder,
                            std::map<std::string, std::vector<std::string>*>* emulators)
 {
@@ -64,6 +65,8 @@ SystemData::SystemData(std::string name, std::string fullName, std::string start
 
 	mSearchExtensions = extensions;
 	mLaunchCommand = command;
+  mHostCommand = hostCommand;
+  mJoinCommand = joinCommand;
 	mPlatformIds = platformIds;
 	mThemeFolder = themeFolder;
 
@@ -236,7 +239,7 @@ std::vector<std::string> readList(const std::string& str, const char* delims = "
 }
 
 SystemData * createSystem(pugi::xml_node * systemsNode, int index ){
-	std::string name, fullname, path, cmd, themeFolder;
+	std::string name, fullname, path, themeFolder;
 	PlatformIds::PlatformId platformId = PlatformIds::PLATFORM_UNKNOWN;
 
 	int myIndex = 0;
@@ -256,7 +259,9 @@ SystemData * createSystem(pugi::xml_node * systemsNode, int index ){
 	// convert extensions list from a string into a vector of strings
 	std::vector<std::string> extensions = readList(system->child("extension").text().get());
 
-	cmd = system->child("command").text().get();
+	std::string cmd = system->child("command").text().get();
+  std::string hostCommand = system->child("hostCommand").text().get();
+  std::string joinCommand = system->child("joinCommand").text().get();
 
 	// platform id list
 	const char* platformList = system->child("platform").text().get();
@@ -313,7 +318,8 @@ SystemData * createSystem(pugi::xml_node * systemsNode, int index ){
 	SystemData* newSys = new EmulatorData(name,
 										fullname,
 										path, extensions,
-										cmd, platformIds,
+										cmd, hostCommand, joinCommand,
+                    platformIds,
 										themeFolder,
 										systemEmulators);
 	if(newSys->getRootFolder()->getChildren().size() == 0)
