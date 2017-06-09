@@ -11,8 +11,6 @@ public:
     static RecalboxSystem *getInstance();
 
     const static Uint32 SDL_FAST_QUIT = 0x800F;
-    const static Uint32 SDL_RB_SHUTDOWN = 0X4000;
-    const static Uint32 SDL_RB_REBOOT = 0x2000;
 
     unsigned long getFreeSpaceGB(std::string mountpoint);
 
@@ -22,24 +20,18 @@ public:
 
     std::string getVersion();
     std::string getRootPassword();
-    
+
     bool setAudioOutputDevice(std::string device);
 
     bool setOverscan(bool enable);
 
     bool setOverclock(std::string mode);
 
-    bool updateLastChangelogFile();
-
-    std::string getChangelog();
-
     std::pair<std::string, int> updateSystem();
 
     bool ping();
 
     bool canUpdate();
-
-    bool launchKodi(Window *window);
 
     bool enableWifi(std::string ssid, std::string key);
 
@@ -77,4 +69,3 @@ private:
 };
 
 #endif
-

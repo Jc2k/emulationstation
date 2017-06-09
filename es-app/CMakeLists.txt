@@ -1,12 +1,14 @@
 project("emulationstation")
 
 set(ES_HEADERS
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/EmulatorData.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/EmulationStation.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/FavoriteData.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/FileData.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/FileSorts.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/LobbyData.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/MetaData.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/PlatformId.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ScraperCmdLine.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/SystemData.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/VolumeControl.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Gamelist.h
@@ -27,7 +29,6 @@ set(ES_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiSettings.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiScraperMulti.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiScraperStart.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiUpdate.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiRomsManager.h
 
     # Scrapers
@@ -55,13 +56,15 @@ set(ES_HEADERS
 )
 
 set(ES_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/EmulatorData.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/FavoriteData.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/FileData.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/FileSorts.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/LobbyData.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/MameNameMap.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/MetaData.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/PlatformId.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ScraperCmdLine.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/SystemData.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/VolumeControl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Gamelist.cpp
@@ -82,7 +85,6 @@ set(ES_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiSettings.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiScraperMulti.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiScraperStart.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiUpdate.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiRomsManager.cpp
 
     # Scrapers
@@ -120,7 +122,7 @@ target_link_libraries(emulationstation ${COMMON_LIBRARIES} es-core)
 
 # special properties for Windows builds
 if(MSVC)
-    # Always compile with the "WINDOWS" subsystem to avoid console window flashing at startup 
+    # Always compile with the "WINDOWS" subsystem to avoid console window flashing at startup
     # when --debug is not set (see es-core/src/main.cpp for explanation).
     # The console will still be shown if launched with --debug.
     # Note that up to CMake 2.8.10 this feature is broken: http://public.kitware.com/Bug/view.php?id=12566

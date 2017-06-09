@@ -238,6 +238,11 @@ void ViewController::onFileChanged(FileData* file, FileChangeType change)
 
 void ViewController::launch(FileData* game, Eigen::Vector3f center)
 {
+		launch(game->getSystem(), game, center);
+}
+
+void ViewController::launch(SystemData* system, FileData* game, Eigen::Vector3f center)
+{
 	if(game->getType() != GAME)
 	{
 		LOG(LogError) << "tried to launch something that isn't a game";
@@ -259,18 +264,18 @@ void ViewController::launch(FileData* game, Eigen::Vector3f center)
 			//mFadeOpacity = lerp<float>(0.0f, 1.0f, t*t*t + 1);
 			mFadeOpacity = lerp<float>(0.0f, 1.0f, t);
 		};
-		setAnimation(new LambdaAnimation(fadeFunc, 800), 0, [this, game, fadeFunc]
+		setAnimation(new LambdaAnimation(fadeFunc, 800), 0, [this, game, fadeFunc, system]
 		{
-			game->getSystem()->launchGame(mWindow, game);
+			system->launchGame(mWindow, game);
 			mLockInput = false;
 			setAnimation(new LambdaAnimation(fadeFunc, 800), 0, nullptr, true);
 			this->onFileChanged(game, FILE_METADATA_CHANGED);
 		});
 	}else{
 		// move camera to zoom in on center + fade out, launch game, come back in
-		setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, 1500), 0, [this, origCamera, center, game]
+		setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, 1500), 0, [this, origCamera, center, game, system]
 		{
-			game->getSystem()->launchGame(mWindow, game);
+			system->launchGame(mWindow, game);
 			mCamera = origCamera;
 			mLockInput = false;
 			setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, 600), 0, nullptr, true);
@@ -289,19 +294,7 @@ std::shared_ptr<IGameListView> ViewController::getGameListView(SystemData* syste
 	//if we didn't, make it, remember it, and return it
 	std::shared_ptr<IGameListView> view;
 
-	//decide type
-	bool detailed = false;
-	std::vector<FileData*> files = system->getRootFolder()->getFilesRecursive(GAME | FOLDER);
-	for(auto it = files.begin(); it != files.end(); it++)
-	{
-		if(!(*it)->getThumbnailPath().empty())
-		{
-			detailed = true;
-			break;
-		}
-	}
-
-	if(detailed)
+	if(system->hasAnyThumbnails())
 		view = std::shared_ptr<IGameListView>(new DetailedGameListView(mWindow, system->getRootFolder(), system));
 	else
 		view = std::shared_ptr<IGameListView>(new BasicGameListView(mWindow, system->getRootFolder()));
@@ -422,17 +415,14 @@ void ViewController::reloadGameListView(IGameListView* view, bool reloadTheme)
 		{
 			bool isCurrent = (mCurrentView == it->second);
 			SystemData* system = it->first;
-			FileData * cursor = NULL;
-			if(system->getGameCount() != 0) {
-				cursor = view->getCursor();
-			}
+			FileData* cursor = view->getCursor();
 			mGameListViews.erase(it);
 
 			if(reloadTheme)
 				system->loadTheme();
 
 			std::shared_ptr<IGameListView> newView = getGameListView(system);
-			if(system->getGameCount() > 1) {
+			if(cursor != NULL) {
 				newView->setCursor(cursor);
 			}else if(system->getGameCount() == 1){
 				newView->setCursor(system->getRootFolder()->getChildren().at(0));
@@ -540,16 +530,5 @@ HelpStyle ViewController::getHelpStyle()
 }
 
 int ViewController::getFirstSystemIndex() {
-	std::string systemName = RecalboxConf::getInstance()->get("system.es.selectedsystem");
-	if(systemName != ""){
-		int index = SystemData::getSystemIndex(systemName);
-		if (index != -1){
-			LOG(LogInfo) << "system.es.selectedsystem variable set to " << systemName.c_str() << " system found !";
-			return index;
-		}else {
-			LOG(LogWarning) << "system.es.selectedsystem variable set to " << systemName.c_str() << " but unable to find such a system.";
-			return 0;
-		}
-	}
 	return 0;
 }

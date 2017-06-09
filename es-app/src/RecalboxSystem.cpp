@@ -1,7 +1,7 @@
 /*
  * File:   RecalboxSystem.cpp
  * Author: digitallumberjack
- * 
+ *
  * Created on 29 novembre 2014, 03:15
  */
 
@@ -91,49 +91,6 @@ std::string RecalboxSystem::getVersion() {
         }
     }
     return "";
-}
-
-
-bool RecalboxSystem::updateLastChangelogFile() {
-    std::ostringstream oss;
-    oss << "cp  " << Settings::getInstance()->getString("Changelog").c_str() << " " <<
-        Settings::getInstance()->getString("LastChangelog").c_str();
-    if (system(oss.str().c_str())) {
-        LOG(LogWarning) << "Error executing " << oss.str().c_str();
-        return false;
-    } else {
-        LOG(LogError) << "Last version file updated";
-        return true;
-    }
-}
-
-std::string RecalboxSystem::getChangelog() {
-    std::ostringstream oss;
-    std::string last = Settings::getInstance()->getString("LastChangelog");
-    std::ifstream f(last);
-    if(!f.good()){
-        std::ofstream outfile (last);
-        outfile << " ";
-        outfile.close();
-    }
-    oss << "diff --changed-group-format='%>' --unchanged-group-format='' " <<
-        last.c_str() << " " <<
-        Settings::getInstance()->getString("Changelog").c_str();
-
-    FILE *pipe = popen(oss.str().c_str(), "r");
-    char line[1024];
-
-    if (pipe == NULL) {
-        return "";
-    }
-    std::ostringstream res;
-    while (fgets(line, 1024, pipe)) {
-        res << line;
-    }
-    pclose(pipe);
-
-    return res.str();
-
 }
 
 bool RecalboxSystem::setAudioOutputDevice(std::string device) {
@@ -247,45 +204,6 @@ bool RecalboxSystem::canUpdate() {
     }
 }
 
-bool RecalboxSystem::launchKodi(Window *window) {
-
-    LOG(LogInfo) << "Attempting to launch kodi...";
-
-
-    AudioManager::getInstance()->deinit();
-    VolumeControl::getInstance()->deinit();
-
-    std::string commandline = InputManager::getInstance()->configureEmulators();
-    std::string command = "configgen -system kodi -rom '' " + commandline;
-
-    window->deinit();
-
-    int exitCode = system(command.c_str());
-    if (WIFEXITED(exitCode)) {
-        exitCode = WEXITSTATUS(exitCode);
-    }
-
-    window->init();
-    VolumeControl::getInstance()->init();
-    AudioManager::getInstance()->resumeMusic();
-    window->normalizeNextUpdate();
-
-    // handle end of kodi
-    switch (exitCode) {
-        case 10: // reboot code
-            reboot();
-            return true;
-            break;
-        case 11: // shutdown code
-            shutdown();
-            return true;
-            break;
-    }
-
-    return exitCode == 0;
-
-}
-
 bool RecalboxSystem::enableWifi(std::string ssid, std::string key) {
     std::ostringstream oss;
     boost::replace_all(ssid, "\"", "\\\"");
@@ -323,17 +241,6 @@ bool RecalboxSystem::disableWifi() {
 
 
 bool RecalboxSystem::halt(bool reboot, bool fast) {
-    SDL_Event *quit = new SDL_Event();
-    if (fast)
-        if (reboot)
-            quit->type = SDL_FAST_QUIT | SDL_RB_REBOOT;
-        else
-            quit->type = SDL_FAST_QUIT | SDL_RB_SHUTDOWN;
-    else if (reboot)
-        quit->type = SDL_QUIT | SDL_RB_REBOOT;
-    else
-        quit->type = SDL_QUIT | SDL_RB_SHUTDOWN;
-    SDL_PushEvent(quit);
     return 0;
 }
 

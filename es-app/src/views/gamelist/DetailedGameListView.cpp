@@ -280,8 +280,7 @@ void DetailedGameListView::launch(FileData* game)
 	Eigen::Vector3f target(Renderer::getScreenWidth() / 2.0f, Renderer::getScreenHeight() / 2.0f, 0);
 	if(mImage.hasImage())
 		target << mImage.getCenter().x(), mImage.getCenter().y(), 0;
-
-	ViewController::get()->launch(game, target);
+	ViewController::get()->launch(getRoot()->getSystem(), game, target);
 }
 
 std::vector<TextComponent*> DetailedGameListView::getMDLabels()
@@ -332,9 +331,12 @@ std::vector<HelpPrompt> DetailedGameListView::getHelpPrompts()
 	prompts.push_back(HelpPrompt("a", _("LAUNCH")));
 	if(!Settings::getInstance()->getBool("HideSystemView"))
 	  prompts.push_back(HelpPrompt("b", _("BACK")));
-	if(getRoot()->getSystem() != SystemData::getFavoriteSystem()) {
+
+	if (getRoot()->getSystem()->allowFavoriting())
 	  prompts.push_back(HelpPrompt("y", _("Favorite")));
+
+	if (getRoot()->getSystem()->allowGameOptions())
 	  prompts.push_back(HelpPrompt("select", _("OPTIONS")));
-	}
+
 	return prompts;
 }

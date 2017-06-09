@@ -11,12 +11,17 @@
 class SystemData
 {
 public:
+	SystemData(std::string name, std::string fullName, std::string themeFolder);
+
 	SystemData(std::string name, std::string fullName, std::string startPath,
                                std::vector<std::string> extensions, std::string command,
+	                             std::string hostCommand, std::string joinCommand,
                                std::vector<PlatformIds::PlatformId> platformIds, std::string themeFolder,
                                std::map<std::string, std::vector<std::string>*>* map);
+
 	SystemData(std::string name, std::string fullName, std::string command,
 			   std::string themeFolder, std::vector<SystemData*>* systems);
+
 	~SystemData();
 
 	inline FileData* getRootFolder() const { return mRootFolder; };
@@ -37,7 +42,7 @@ public:
 	std::string getGamelistPath(bool forWrite) const;
 	bool hasGamelist() const;
 	std::string getThemePath() const;
-	
+
 	unsigned int getGameCount() const;
 	unsigned int getFavoritesCount() const;
 	unsigned int getHiddenCount() const;
@@ -46,16 +51,14 @@ public:
 
 	static void deleteSystems();
 	static bool loadConfig(); //Load the system config file at getConfigPath(). Returns true if no errors were encountered. An example will be written if the file doesn't exist.
-	static void writeExampleConfig(const std::string& path);
 	static std::string getConfigPath(bool forWrite); // if forWrite, will only return ~/.emulationstation/es_systems.cfg, never /etc/emulationstation/es_systems.cfg
 
 	static std::vector<SystemData*> sSystemVector;
-	static SystemData *getFavoriteSystem();
 	static int getSystemIndex(std::string name);
 
 	inline std::vector<SystemData*>::const_iterator getIterator() const { return std::find(sSystemVector.begin(), sSystemVector.end(), this); };
 	inline std::vector<SystemData*>::const_reverse_iterator getRevIterator() const { return std::find(sSystemVector.rbegin(), sSystemVector.rend(), this); };
-	
+
 	inline SystemData* getNext() const
 	{
 		auto it = getIterator();
@@ -78,15 +81,22 @@ public:
 	// refresh the roms files
 	void refreshRootFolder();
 
+	std::string getLaunchCommandForGame(FileData *game);
 
 	std::map<std::string, std::vector<std::string> *> * getEmulators();
+
+	virtual bool hasAnyThumbnails() const = 0;
+	virtual bool allowGameOptions() const = 0;
+	virtual bool allowFavoriting() const = 0;
+
 private:
 	std::string mName;
 	std::string mFullName;
 	std::string mStartPath;
 	std::vector<std::string> mSearchExtensions;
 	std::string mLaunchCommand;
-	std::vector<PlatformIds::PlatformId> mPlatformIds;
+	std::string mHostCommand;
+	std::string mJoinCommand;
 	std::string mThemeFolder;
 	std::shared_ptr<ThemeData> mTheme;
 
@@ -95,7 +105,10 @@ private:
 
 	void populateFolder(FileData* folder);
 
-	FileData* mRootFolder;
 	std::map<std::string, std::vector<std::string> *> *mEmulators;
 
+protected:
+	// FIXME: This probably shouldn't be in SystemData
+	FileData* mRootFolder;
+	std::vector<PlatformIds::PlatformId> mPlatformIds;
 };

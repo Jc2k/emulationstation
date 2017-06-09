@@ -25,6 +25,9 @@ public:
 	virtual void populateList(const std::vector<FileData*>& files) override;
 
 	virtual inline void updateInfoPanel() override {}
+
+	inline bool isEmpty() { return mList.size() == 0; }
+
 protected:
 	virtual void launch(FileData* game) override;
 

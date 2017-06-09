@@ -16,6 +16,9 @@
 #include "ThemeData.h"
 #include "AudioManager.h"
 #include "Locale.h"
+#include "LobbyData.h"
+#include "FavoriteData.h"
+
 
 #define SELECTED_SCALE 1.5f
 #define LOGO_PADDING ((logoSize().x() * (SELECTED_SCALE - 1)/2) + (mSize.x() * 0.06f))
@@ -37,9 +40,6 @@ SystemView::SystemView(Window* window) : IList<SystemViewData, SystemData*>(wind
 }
 
 void SystemView::addSystem(SystemData * it){
-	if((it)->getRootFolder()->getChildren().size() == 0){
-		return;
-	}
 	const std::shared_ptr<ThemeData>& theme = (it)->getTheme();
 
 	Entry e;
@@ -86,20 +86,32 @@ void SystemView::addSystem(SystemData * it){
 
 	this->add(e);
 }
+
+void SystemView::removeSystem(SystemData * system){
+	for(auto it = mEntries.begin(); it != mEntries.end(); it++)
+		if(it->object == system){
+			mEntries.erase(it);
+			break;
+		}
+}
+
 void SystemView::populate()
 {
 	mEntries.clear();
 
-	for(auto it = SystemData::sSystemVector.begin(); it != SystemData::sSystemVector.end(); it++)
-	{
+	for(auto it = SystemData::sSystemVector.begin(); it != SystemData::sSystemVector.end(); it++){
 		addSystem((*it));
 	}
+
+  mFavoriteData = new FavoriteData("Favourites", "", "favorites", &SystemData::sSystemVector);
+  addSystem(mFavoriteData);
+
+  mLobbyData = new LobbyData(&SystemData::sSystemVector);
+  addSystem(mLobbyData);
 }
 
 void SystemView::goToSystem(SystemData* system, bool animate)
 {
-
-
 	setCursor(system);
 
 	if(!animate)
@@ -378,28 +390,20 @@ HelpStyle SystemView::getHelpStyle()
 	return style;
 }
 
-void SystemView::removeFavoriteSystem(){
-	for(auto it = mEntries.begin(); it != mEntries.end(); it++)
-		if(it->object->isFavorite()){
-			mEntries.erase(it);
-			break;
-		}
-}
-
 void SystemView::manageFavorite(){
 	bool hasFavorite = false;
 	for(auto it = mEntries.begin(); it != mEntries.end(); it++)
 		if(it->object->isFavorite()){
 			hasFavorite = true;
 		}
-	SystemData *favorite = SystemData::getFavoriteSystem();
+
 	if(hasFavorite) {
-		if (favorite->getFavoritesCount() == 0) {
-			removeFavoriteSystem();
+		if (mFavoriteData->getFavoritesCount() == 0) {
+			removeSystem(mFavoriteData);
 		}
 	}else {
-		if (favorite->getFavoritesCount() > 0) {
-			addSystem(favorite);
+		if (mFavoriteData->getFavoritesCount() > 0) {
+			addSystem(mFavoriteData);
 		}
 	}
 }

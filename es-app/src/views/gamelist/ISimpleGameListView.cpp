@@ -57,9 +57,9 @@ void ISimpleGameListView::onFileChanged(FileData* file, FileChangeType change)
 
 	/* Favorite */
 	if(file->getType() == GAME){
-		SystemData * favoriteSystem = SystemData::getFavoriteSystem();
+		/*SystemData * favoriteSystem = SystemData::getFavoriteSystem();
 		bool isFavorite = file->metadata.get("favorite") == "true";
-		bool foundInFavorite = false;
+		bool foundInFavorite = false;*/
 		/* Removing favortie case : */
 		/*for(auto gameInFavorite = favoriteSystem->getRootFolder()->getChildren().begin();
 			gameInFavorite != favoriteSystem->getRootFolder()->getChildren().end();
@@ -125,7 +125,7 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 			}
 
 			return true;
-		}else if (config->isMappedTo("y", input))
+		}/*else if (config->isMappedTo("y", input))
 		{
 			FileData* cursor = getCursor();
 			if (!ViewController::get()->getState().getSystem()->isFavorite() && cursor->getSystem()->getHasFavorites())
@@ -162,7 +162,7 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 					updateInfoPanel();
 				}
 			}
-		}else if(config->isMappedTo("right", input))
+		}*/else if(config->isMappedTo("right", input))
 		{
 			if(Settings::getInstance()->getBool("QuickSystemSelect") && !Settings::getInstance()->getBool("HideSystemView"))
 			{

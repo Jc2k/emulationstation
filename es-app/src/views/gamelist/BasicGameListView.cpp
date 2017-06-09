@@ -31,7 +31,6 @@ void BasicGameListView::onFileChanged(FileData* file, FileChangeType change)
 
 	if(change == FILE_METADATA_CHANGED)
 	{
-		LOG(LogWarning) << "EXCREMENT";
 		// might switch to a detailed view
 		ViewController::get()->reloadGameListView(this);
 		return;
@@ -213,7 +212,9 @@ void BasicGameListView::populateList(const std::vector<FileData*>& files)
 
 FileData* BasicGameListView::getCursor()
 {
-	return mList.getSelected();
+	if (!isEmpty())
+		return mList.getSelected();
+	return NULL;
 }
 
 void BasicGameListView::setCursorIndex(int cursor){
@@ -255,7 +256,7 @@ void BasicGameListView::setCursor(FileData* cursor)
 
 void BasicGameListView::launch(FileData* game)
 {
-	ViewController::get()->launch(game);
+	ViewController::get()->launch(getRoot()->getSystem(), game);
 }
 
 std::vector<HelpPrompt> BasicGameListView::getHelpPrompts()
@@ -268,9 +269,12 @@ std::vector<HelpPrompt> BasicGameListView::getHelpPrompts()
 	prompts.push_back(HelpPrompt("a", _("LAUNCH")));
 	if(!Settings::getInstance()->getBool("HideSystemView"))
 	  prompts.push_back(HelpPrompt("b", _("BACK")));
-	if(getRoot()->getSystem() != SystemData::getFavoriteSystem()) {
+
+	if (getRoot()->getSystem()->allowFavoriting())
 	  prompts.push_back(HelpPrompt("y", _("Favorite")));
+
+	if (getRoot()->getSystem()->allowGameOptions())
 	  prompts.push_back(HelpPrompt("select", _("OPTIONS")));
-	}
+
 	return prompts;
 }

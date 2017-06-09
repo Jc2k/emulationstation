@@ -17,13 +17,34 @@
 #include <boost/thread.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/make_shared.hpp>
+#include "Lobby.h"
+#include "EmulatorData.h"
+#include "FavoriteData.h"
+
 
 std::vector<SystemData*> SystemData::sSystemVector;
 
 namespace fs = boost::filesystem;
 
+SystemData::SystemData(std::string name, std::string fullName, std::string themeFolder) {
+  mName = name;
+	mFullName = fullName;
+  mThemeFolder = themeFolder;
+  mStartPath = "";
+	mLaunchCommand = "";
+
+	mRootFolder = new FileData(FOLDER, mStartPath, this);
+	mRootFolder->metadata.set("name", mFullName);
+
+	mIsFavorite = false;
+	mPlatformIds.push_back(PlatformIds::PLATFORM_IGNORE);
+
+	loadTheme();
+}
+
 SystemData::SystemData(std::string name, std::string fullName, std::string startPath,
                            std::vector<std::string> extensions, std::string command,
+                           std::string hostCommand, std::string joinCommand,
                            std::vector<PlatformIds::PlatformId> platformIds, std::string themeFolder,
                            std::map<std::string, std::vector<std::string>*>* emulators)
 {
@@ -44,6 +65,8 @@ SystemData::SystemData(std::string name, std::string fullName, std::string start
 
 	mSearchExtensions = extensions;
 	mLaunchCommand = command;
+  mHostCommand = hostCommand;
+  mJoinCommand = joinCommand;
 	mPlatformIds = platformIds;
 	mThemeFolder = themeFolder;
 
@@ -85,17 +108,13 @@ SystemData::SystemData(std::string name, std::string fullName, std::string comma
 		mRootFolder->sort(FileSorts::SortTypes.at(0));
 	mIsFavorite = true;
 	mPlatformIds.push_back(PlatformIds::PLATFORM_IGNORE);
+
 	loadTheme();
 }
 
 SystemData::~SystemData()
 {
-	//save changed game data back to xml
-	if(!Settings::getInstance()->getBool("IgnoreGamelist"))
-	{
-		updateGamelist(this);
-	}
-
+	updateGamelist(this);
 	delete mRootFolder;
 }
 
@@ -142,44 +161,60 @@ std::string escapePath(const boost::filesystem::path& path)
 #endif
 }
 
+std::string SystemData::getLaunchCommandForGame(FileData *game) {
+  std::string command;
+  if (!game->metadata.get("peer").empty())
+    command = game->getSystem()->mJoinCommand;
+  else
+    command = game->getSystem()->mLaunchCommand;
+
+  const std::string rom = escapePath(game->getPath());
+  command = strreplace(command, "%ROM%", rom);
+
+  const std::string controlersConfig = InputManager::getInstance()->configureEmulators();
+  LOG(LogInfo) << "Controllers config : " << controlersConfig;
+  command = strreplace(command, "%CONTROLLERSCONFIG%", controlersConfig);
+
+  const std::string basename = game->getPath().stem().string();
+  command = strreplace(command, "%BASENAME%", basename);
+
+  const std::string rom_raw = fs::path(game->getPath()).make_preferred().string();
+  command = strreplace(command, "%ROM_RAW%", rom_raw);
+
+  command = strreplace(command, "%SYSTEM%", game->metadata.get("system"));
+  command = strreplace(command, "%EMULATOR%", game->metadata.get("emulator"));
+  command = strreplace(command, "%CORE%", game->metadata.get("core"));
+  command = strreplace(command, "%RATIO%", game->metadata.get("ratio"));
+  command = strreplace(command, "%PEER%", game->metadata.get("peer"));
+
+  return command;
+}
+
 void SystemData::launchGame(Window* window, FileData* game)
 {
 	LOG(LogInfo) << "Attempting to launch game...";
 
-
 	AudioManager::getInstance()->deinit();
 	VolumeControl::getInstance()->deinit();
 
-    std::string controlersConfig = InputManager::getInstance()->configureEmulators();
-	LOG(LogInfo) << "Controllers config : " << controlersConfig;
 	window->deinit();
 
+  if (game->metadata.get("peer").empty())
+    LobbyThread::getInstance()->startBroadcast(game->metadata.get("hash"));
 
-
-	std::string command = mLaunchCommand;
-
-	const std::string rom = escapePath(game->getPath());
-	const std::string basename = game->getPath().stem().string();
-	const std::string rom_raw = fs::path(game->getPath()).make_preferred().string();
-
-	command = strreplace(command, "%ROM%", rom);
-	command = strreplace(command, "%CONTROLLERSCONFIG%", controlersConfig);
-	command = strreplace(command, "%SYSTEM%", game->metadata.get("system"));
-	command = strreplace(command, "%BASENAME%", basename);
-	command = strreplace(command, "%ROM_RAW%", rom_raw);
-	command = strreplace(command, "%EMULATOR%", game->metadata.get("emulator"));
-	command = strreplace(command, "%CORE%", game->metadata.get("core"));
-	command = strreplace(command, "%RATIO%", game->metadata.get("ratio"));
-
+  std::string command = getLaunchCommandForGame(game);
 	LOG(LogInfo) << "	" << command;
+
 	std::cout << "==============================================\n";
 	int exitCode = runSystemCommand(command);
 	std::cout << "==============================================\n";
 
-	if(exitCode != 0)
-	{
+	if(exitCode != 0){
 		LOG(LogWarning) << "...launch terminated with nonzero exit code " << exitCode << "!";
 	}
+
+  if (game->metadata.get("peer").empty())
+    LobbyThread::getInstance()->stopBroadcast();
 
 	window->init();
 	VolumeControl::getInstance()->init();
@@ -218,7 +253,7 @@ std::vector<std::string> readList(const std::string& str, const char* delims = "
 }
 
 SystemData * createSystem(pugi::xml_node * systemsNode, int index ){
-	std::string name, fullname, path, cmd, themeFolder;
+	std::string name, fullname, path, themeFolder;
 	PlatformIds::PlatformId platformId = PlatformIds::PLATFORM_UNKNOWN;
 
 	int myIndex = 0;
@@ -238,7 +273,9 @@ SystemData * createSystem(pugi::xml_node * systemsNode, int index ){
 	// convert extensions list from a string into a vector of strings
 	std::vector<std::string> extensions = readList(system->child("extension").text().get());
 
-	cmd = system->child("command").text().get();
+	std::string cmd = system->child("command").text().get();
+  std::string hostCommand = system->child("hostCommand").text().get();
+  std::string joinCommand = system->child("joinCommand").text().get();
 
 	// platform id list
 	const char* platformList = system->child("platform").text().get();
@@ -292,10 +329,11 @@ SystemData * createSystem(pugi::xml_node * systemsNode, int index ){
 	}
 
 
-	SystemData* newSys = new SystemData(name,
+	SystemData* newSys = new EmulatorData(name,
 										fullname,
 										path, extensions,
-										cmd, platformIds,
+										cmd, hostCommand, joinCommand,
+                    platformIds,
 										themeFolder,
 										systemEmulators);
 	if(newSys->getRootFolder()->getChildren().size() == 0)
@@ -320,7 +358,6 @@ bool SystemData::loadConfig()
 	if(!fs::exists(path))
 	{
 		LOG(LogError) << "es_systems.cfg file does not exist!";
-		writeExampleConfig(getConfigPath(true));
 		return false;
 	}
 
@@ -376,71 +413,7 @@ bool SystemData::loadConfig()
 	ioService.stop();
 	threadpool.join_all();
 
-	// Favorite system
-	for(pugi::xml_node system = systemList.child("system"); system; system = system.next_sibling("system")) {
-
-		std::string name = system.child("name").text().get();
-		std::string fullname = system.child("fullname").text().get();
-		std::string cmd = system.child("command").text().get();
-		std::string themeFolder = system.child("theme").text().as_string(name.c_str());
-
-		if (name == "favorites") {
-			LOG(LogInfo) << "creating favorite system";
-			SystemData *newSys = new SystemData("favorites", fullname, cmd, themeFolder, &sSystemVector);
-			sSystemVector.push_back(newSys);
-		}
-	}
-
-
 	return true;
-}
-
-
-
-void SystemData::writeExampleConfig(const std::string& path)
-{
-	std::ofstream file(path.c_str());
-
-	file << "<!-- This is the EmulationStation Systems configuration file.\n"
-			"All systems must be contained within the <systemList> tag.-->\n"
-			"\n"
-			"<systemList>\n"
-			"	<!-- Here's an example system to get you started. -->\n"
-			"	<system>\n"
-			"\n"
-			"		<!-- A short name, used internally. Traditionally lower-case. -->\n"
-			"		<name>nes</name>\n"
-			"\n"
-			"		<!-- A \"pretty\" name, displayed in menus and such. -->\n"
-			"		<fullname>Nintendo Entertainment System</fullname>\n"
-			"\n"
-			"		<!-- The path to start searching for ROMs in. '~' will be expanded to $HOME on Linux or %HOMEPATH% on Windows. -->\n"
-			"		<path>~/roms/nes</path>\n"
-			"\n"
-			"		<!-- A list of extensions to search for, delimited by any of the whitespace characters (\", \\r\\n\\t\").\n"
-			"		You MUST include the period at the start of the extension! It's also case sensitive. -->\n"
-			"		<extension>.nes .NES</extension>\n"
-			"\n"
-			"		<!-- The shell command executed when a game is selected. A few special tags are replaced if found in a command:\n"
-			"		%ROM% is replaced by a bash-special-character-escaped absolute path to the ROM.\n"
-			"		%BASENAME% is replaced by the \"base\" name of the ROM.  For example, \"/foo/bar.rom\" would have a basename of \"bar\". Useful for MAME.\n"
-			"		%ROM_RAW% is the raw, unescaped path to the ROM. -->\n"
-			"		<command>retroarch -L ~/cores/libretro-fceumm.so %ROM%</command>\n"
-			"\n"
-			"		<!-- The platform to use when scraping. You can see the full list of accepted platforms in src/PlatformIds.cpp.\n"
-			"		It's case sensitive, but everything is lowercase. This tag is optional.\n"
-			"		You can use multiple platforms too, delimited with any of the whitespace characters (\", \\r\\n\\t\"), eg: \"genesis, megadrive\" -->\n"
-			"		<platform>nes</platform>\n"
-			"\n"
-			"		<!-- The theme to load from the current theme set.  See THEMES.md for more information.\n"
-			"		This tag is optional. If not set, it will default to the value of <name>. -->\n"
-			"		<theme>nes</theme>\n"
-			"	</system>\n"
-			"</systemList>\n";
-
-	file.close();
-
-	LOG(LogError) << "Example config written!  Go read it at \"" << path << "\"!";
 }
 
 bool deleteSystem(SystemData * system){
@@ -575,15 +548,6 @@ std::map<std::string, std::vector<std::string>*>* SystemData::getEmulators() {
 	return mEmulators;
 }
 
-SystemData* SystemData::getFavoriteSystem() {
-	for(auto system = sSystemVector.begin(); system != sSystemVector.end(); system ++){
-		if((*system)->isFavorite()){
-			return (*system);
-		}
-	}
-	return NULL;
-}
-
 int SystemData::getSystemIndex(std::string name) {
     int index = 0;
 	for(auto system = sSystemVector.begin(); system != sSystemVector.end(); system ++){
@@ -594,4 +558,3 @@ int SystemData::getSystemIndex(std::string name) {
 	}
 	return -1;
 }
-

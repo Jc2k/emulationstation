@@ -30,6 +30,9 @@ void initMetadata() {
   gameMDD.push_back(MetaDataDecl("romtype",	MD_STRING,		"Original",		false,		_("Romtype"),			_("enter romtype")));
   gameMDD.push_back(MetaDataDecl("hidden",	MD_BOOL,		"false",		false,		_("Hidden"),			_("set hidden")));
 
+  gameMDD.push_back(MetaDataDecl("hash",	MD_STRING,		"", 			true,		_("Name"),			_("enter game md5 hash")));
+  gameMDD.push_back(MetaDataDecl("peer",	MD_STRING,		"", 			true,		_("Name"),			_("ip address of a server playing this game")));
+
   gameMDD.push_back(MetaDataDecl("playcount",	MD_INT,			"0",			true,		_("Play count"),		_("enter number of times played")));
   gameMDD.push_back(MetaDataDecl("lastplayed",	MD_TIME,		"0", 			true,		_("Last played"),		_("enter last played date")));
 
@@ -103,7 +106,7 @@ void MetaDataList::appendToXML(pugi::xml_node parent, bool ignoreDefaults, const
 			// if it's just the default (and we ignore defaults), don't write it
 			if(ignoreDefaults && mapIter->second == mddIter->defaultValue)
 				continue;
-			
+
 			// try and make paths relative if we can
 			std::string value = mapIter->second;
 			if(mddIter->type == MD_IMAGE_PATH)

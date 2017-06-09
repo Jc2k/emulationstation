@@ -58,7 +58,7 @@ void GridGameListView::populateList(const std::vector<FileData*>& files)
 
 void GridGameListView::launch(FileData* game)
 {
-	ViewController::get()->launch(game);
+	ViewController::get()->launch(getRoot()->getSystem(), game);
 }
 
 std::vector<HelpPrompt> GridGameListView::getHelpPrompts()

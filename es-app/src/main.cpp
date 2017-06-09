@@ -18,15 +18,14 @@
 #include "EmulationStation.h"
 #include "RecalboxSystem.h"
 #include "Settings.h"
-#include "ScraperCmdLine.h"
 #include "VolumeControl.h"
 #include <sstream>
 #include "Locale.h"
 #include <boost/algorithm/string.hpp>
-#include <RecalboxConf.h>
 #include "resources/Font.h"
 #include "RecalboxSystem.h"
 #include "FileSorts.h"
+#include "Lobby.h"
 
 
 #ifdef WIN32
@@ -34,8 +33,6 @@
 #endif
 
 namespace fs = boost::filesystem;
-
-bool scrape_cmdline = false;
 
 void playSound(std::string name);
 
@@ -82,9 +79,6 @@ bool parseArgs(int argc, char* argv[], unsigned int* width, unsigned int* height
 			bool vsync = (strcmp(argv[i + 1], "on") == 0 || strcmp(argv[i + 1], "1") == 0) ? true : false;
 			Settings::getInstance()->setBool("VSync", vsync);
 			i++; // skip vsync value
-		}else if(strcmp(argv[i], "--scrape") == 0)
-		{
-			scrape_cmdline = true;
 		}else if(strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0)
 		{
 #ifdef WIN32
@@ -95,7 +89,7 @@ bool parseArgs(int argc, char* argv[], unsigned int* width, unsigned int* height
 			AttachConsole(ATTACH_PARENT_PROCESS);
 			freopen("CONOUT$", "wb", stdout);
 #endif
-			std::cout << 
+			std::cout <<
 				"EmulationStation, a graphical front-end for ROM browsing.\n"
 				"Written by Alec \"Aloshi\" Lofquist.\n"
 				"Version " << PROGRAM_VERSION_STRING << ", built " << PROGRAM_BUILT_STRING << "\n\n"
@@ -107,7 +101,6 @@ bool parseArgs(int argc, char* argv[], unsigned int* width, unsigned int* height
 				"--no-exit			don't show the exit option in the menu\n"
 				"--hide-systemview		show only gamelist view, no system view\n"
 				"--debug				more logging, show console on Windows\n"
-				"--scrape			scrape using command line interface\n"
 				"--windowed			not fullscreen, should be used with --resolution\n"
 				"--vsync [1/on or 0/off]		turn vsync on or off (default is on)\n"
 				"--help, -h			summon a sentient, angry tuba\n\n"
@@ -138,7 +131,7 @@ bool verifyHomeFolderExists()
 	return true;
 }
 
-// Returns true if everything is OK, 
+// Returns true if everything is OK,
 bool loadSystemConfigFile(const char** errorString)
 {
 	*errorString = NULL;
@@ -148,17 +141,6 @@ bool loadSystemConfigFile(const char** errorString)
 		LOG(LogError) << "Error while parsing systems configuration file!";
 		*errorString = "IT LOOKS LIKE YOUR SYSTEMS CONFIGURATION FILE HAS NOT BEEN SET UP OR IS INVALID. YOU'LL NEED TO DO THIS BY HAND, UNFORTUNATELY.\n\n"
 			"VISIT EMULATIONSTATION.ORG FOR MORE INFORMATION.";
-		return false;
-	}
-
-	if(SystemData::sSystemVector.size() == 0)
-	{
-		LOG(LogError) << "No systems found! Does at least one system have a game present? (check that extensions match!)\n(Also, make sure you've updated your es_systems.cfg for XML!)";
-		*errorString = "WE CAN'T FIND ANY SYSTEMS!\n"
-		  "CHECK THAT YOUR PATHS ARE CORRECT IN THE SYSTEMS CONFIGURATION FILE, AND "
-		  "YOUR GAME DIRECTORY HAS AT LEAST ONE GAME WITH THE CORRECT EXTENSION.\n"
-		  "\n"
-		  "VISIT RECALBOX.FR FOR MORE INFORMATION.";
 		return false;
 	}
 
@@ -188,7 +170,7 @@ int setLocale(char * argv1)
     		getcwd(abs_exe_path, sizeof(abs_exe_path));
     		chdir(path_save);
   	}
-	boost::locale::localization_backend_manager my = boost::locale::localization_backend_manager::global(); 
+	boost::locale::localization_backend_manager my = boost::locale::localization_backend_manager::global();
 	// Get global backend
 
     	my.select("std");
@@ -226,8 +208,8 @@ int main(int argc, char* argv[])
 	// only show the console on Windows if HideConsole is false
 #ifdef WIN32
 	// MSVC has a "SubSystem" option, with two primary options: "WINDOWS" and "CONSOLE".
-	// In "WINDOWS" mode, no console is automatically created for us.  This is good, 
-	// because we can choose to only create the console window if the user explicitly 
+	// In "WINDOWS" mode, no console is automatically created for us.  This is good,
+	// because we can choose to only create the console window if the user explicitly
 	// asks for it, preventing it from flashing open and then closing.
 	// In "CONSOLE" mode, a console is always automatically created for us before we
 	// enter main. In this case, we can only hide the console after the fact, which
@@ -249,7 +231,7 @@ int main(int argc, char* argv[])
 	}else{
 		// we want to hide the console
 		// if we're compiled with the "WINDOWS" subsystem, this is already done.
-		// if we're compiled with the "CONSOLE" subsystem, a console is already created; 
+		// if we're compiled with the "CONSOLE" subsystem, a console is already created;
 		// it'll flash open, but we hide it nearly immediately
 		if(GetConsoleWindow()) // should only pass in "CONSOLE" mode
 			ShowWindow(GetConsoleWindow(), SW_HIDE);
@@ -273,26 +255,24 @@ int main(int argc, char* argv[])
 	// other init
 	FileSorts::init(); // require locale
 	initMetadata(); // require locale
-	
+
     Renderer::init(width, height);
 	Window window;
 	ViewController::init(&window);
 	window.pushGui(ViewController::get());
 
-	if(!scrape_cmdline)
-    {
-        if(!window.init(width, height, false))
-		{
-			LOG(LogError) << "Window failed to initialize!";
-			return 1;
-		}
-
-		std::string glExts = (const char*)glGetString(GL_EXTENSIONS);
-		LOG(LogInfo) << "Checking available OpenGL extensions...";
-		LOG(LogInfo) << " ARB_texture_non_power_of_two: " << (glExts.find("ARB_texture_non_power_of_two") != std::string::npos ? "OK" : "MISSING");
-
-		window.renderLoadingScreen();
+	if(!window.init(width, height, false)) {
+		LOG(LogError) << "Window failed to initialize!";
+		return 1;
 	}
+
+	std::string glExts = (const char*)glGetString(GL_EXTENSIONS);
+	LOG(LogInfo) << "Checking available OpenGL extensions...";
+	LOG(LogInfo) << " ARB_texture_non_power_of_two: " << (glExts.find("ARB_texture_non_power_of_two") != std::string::npos ? "OK" : "MISSING");
+
+	window.renderLoadingScreen();
+
+	LobbyThread::getInstance();
 
 	// Initialize audio manager
 	VolumeControl::getInstance()->init();
@@ -307,49 +287,24 @@ int main(int argc, char* argv[])
 		if(errorMsg == NULL)
 		{
 			LOG(LogError) << "Unknown error occured while parsing system config file.";
-			if(!scrape_cmdline)
-				Renderer::deinit();
+			Renderer::deinit();
 			return 1;
 		}
 
 		// we can't handle es_systems.cfg file problems inside ES itself, so display the error message then quit
 		window.pushGui(new GuiMsgBox(&window,
 			errorMsg,
-					     _("QUIT"), [] { 
+					     _("QUIT"), [] {
 				SDL_Event* quit = new SDL_Event();
 				quit->type = SDL_QUIT;
 				SDL_PushEvent(quit);
 			}));
 	}
 
-	RecalboxConf* recalboxConf = RecalboxConf::getInstance();
-	if(recalboxConf->get("kodi.enabled") == "1" && recalboxConf->get("kodi.atstartup") == "1"){
-		RecalboxSystem::getInstance()->launchKodi(&window);
-	}
 	RecalboxSystem::getInstance()->getIpAdress();
-	// UPDATED VERSION MESSAGE
-    std::string changelog = RecalboxSystem::getInstance()->getChangelog();
-    if (changelog != "") {
-		std::string message = _("THE SYSTEM IS UP TO DATE:") + "\n" + changelog;
-        window.pushGui(
-                new GuiMsgBoxScroll(
-                        &window,
-						message, _("OK"),
-                        [] {
-                            RecalboxSystem::getInstance()->updateLastChangelogFile();
-                        }, "", nullptr, "", nullptr, ALIGN_LEFT));
-    }
-
-	//run the command line scraper then quit
-	if(scrape_cmdline)
-	{
-		return run_scraper_cmdline();
-	}
 
 	//dont generate joystick events while we're loading (hopefully fixes "automatically started emulator" bug)
 	SDL_JoystickEventState(SDL_DISABLE);
-
-
 
 	// preload what we can right away instead of waiting for the user to select it
 	// this makes for no delays when accessing content, but a longer startup time
@@ -377,9 +332,7 @@ int main(int argc, char* argv[])
 
 	int lastTime = SDL_GetTicks();
 	bool running = true;
-	bool doReboot = false;
-	bool doShutdown = false;
-	
+
 	while(running)
 	{
 		SDL_Event event;
@@ -401,24 +354,6 @@ int main(int argc, char* argv[])
 					break;
 				case SDL_QUIT:
 					running = false;
-					break;
-				case RecalboxSystem::SDL_FAST_QUIT | RecalboxSystem::SDL_RB_REBOOT:
-					running = false;
-					doReboot = true;
-					Settings::getInstance()->setBool("IgnoreGamelist", true);
-					break;
-				case RecalboxSystem::SDL_FAST_QUIT | RecalboxSystem::SDL_RB_SHUTDOWN:
-					running = false;
-					doShutdown = true;
-					Settings::getInstance()->setBool("IgnoreGamelist", true);
-					break;
-				case SDL_QUIT | RecalboxSystem::SDL_RB_REBOOT:
-					running = false;
-					doReboot = true;
-					break;
-				case SDL_QUIT | RecalboxSystem::SDL_RB_SHUTDOWN:
-					running = false;
-					doShutdown = true;
 					break;
 			}
 		}
@@ -455,15 +390,6 @@ int main(int argc, char* argv[])
 	SystemData::deleteSystems();
 	window.deinit();
 	LOG(LogInfo) << "EmulationStation cleanly shutting down.";
-	if (doReboot) {
-		LOG(LogInfo) << "Rebooting system";
-		system("touch /tmp/reboot.please");
-		system("shutdown -r now");
-	} else if (doShutdown) {
-		LOG(LogInfo) << "Shutting system down";
-		system("touch /tmp/shutdown.please");
-		system("shutdown -h now");
-	}
 
 	return 0;
 }
