@@ -106,7 +106,7 @@ LobbyThread::LobbyThread() {
 
 	srvaddr.sin_family = AF_INET;
 	srvaddr.sin_port = htons(5601);
-	srvaddr.sin_addr.s_addr = INADDR_ANY;
+	srvaddr.sin_addr.s_addr = INADDR_BROADCAST;
 
 	if( bind(m_broadcast_fd, (struct sockaddr*) &srvaddr, sizeof(srvaddr)) == -1 ) {
 		std::cerr << "bind error: " << strerror(errno) << std::endl;
@@ -184,7 +184,7 @@ void LobbyThread::handleTimeout() {
 	memset( &srvaddr, 0, sizeof( srvaddr ) );
 	srvaddr.sin_family = AF_INET;
 	srvaddr.sin_port = htons(5601);
-	srvaddr.sin_addr.s_addr = INADDR_ANY;
+	srvaddr.sin_addr.s_addr = INADDR_BROADCAST;
 
 	if (sendto(m_broadcast_fd, m_gameHash.c_str(), m_gameHash.length(), 0, ( struct sockaddr * )&srvaddr, sizeof(srvaddr)) < 0) {
 		std::cerr << "sendto error: " << strerror(errno) << std::endl;
