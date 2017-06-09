@@ -162,9 +162,13 @@ std::string escapePath(const boost::filesystem::path& path)
 }
 
 std::string SystemData::getLaunchCommandForGame(FileData *game) {
+  bool multiplayerEnabled = true;
+
   std::string command;
   if (!game->metadata.get("peer").empty())
     command = game->getSystem()->mJoinCommand;
+  else if (multiplayerEnabled)
+    command = game->getSystem()->mHostCommand;
   else
     command = game->getSystem()->mLaunchCommand;
 
