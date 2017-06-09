@@ -199,7 +199,8 @@ void SystemData::launchGame(Window* window, FileData* game)
 
 	window->deinit();
 
-  LobbyThread::getInstance()->startBroadcast(game->metadata.get("hash"));
+  if (game->metadata.get("peer").empty())
+    LobbyThread::getInstance()->startBroadcast(game->metadata.get("hash"));
 
   std::string command = getLaunchCommandForGame(game);
 	LOG(LogInfo) << "	" << command;
@@ -212,7 +213,8 @@ void SystemData::launchGame(Window* window, FileData* game)
 		LOG(LogWarning) << "...launch terminated with nonzero exit code " << exitCode << "!";
 	}
 
-  LobbyThread::getInstance()->stopBroadcast();
+  if (game->metadata.get("peer").empty())
+    LobbyThread::getInstance()->stopBroadcast();
 
 	window->init();
 	VolumeControl::getInstance()->init();
