@@ -183,13 +183,6 @@ std::pair<std::string, int> RecalboxSystem::updateSystem() {
     }
 }
 
-bool RecalboxSystem::ping() {
-    std::string updateserver = Settings::getInstance()->getString("UpdateServer");
-    std::string s("ping -c 1 " + updateserver);
-    int exitcode = system(s.c_str());
-    return exitcode == 0;
-}
-
 bool RecalboxSystem::canUpdate() {
     std::ostringstream oss;
     oss << Settings::getInstance()->getString("RecalboxSettingScript") << " " << "canupdate";

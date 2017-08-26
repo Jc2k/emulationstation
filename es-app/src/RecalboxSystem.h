@@ -29,8 +29,6 @@ public:
 
     std::pair<std::string, int> updateSystem();
 
-    bool ping();
-
     bool canUpdate();
 
     bool enableWifi(std::string ssid, std::string key);
