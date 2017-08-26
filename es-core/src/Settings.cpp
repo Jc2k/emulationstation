@@ -20,7 +20,6 @@ std::vector<const char *> settings_dont_save = boost::assign::list_of
         ("HideConsole")
         ("IgnoreGamelist")
         ("UpdateCommand")
-        ("UpdateServer")
         ("VersionFile")
         ("SharePartition")
         ("RecalboxSettingScript")
@@ -93,7 +92,6 @@ void Settings::setDefaults() {
     mStringMap["INPUT P4"] = "DEFAULT";
     mStringMap["Overclock"] = "none";
     mStringMap["UpdateCommand"] = "/recalbox/scripts/recalbox-upgrade.sh";
-    mStringMap["UpdateServer"] = "archive.recalbox.com";
     mStringMap["VersionFile"] = "/recalbox/recalbox.version";
     mStringMap["SharePartition"] = "/recalbox/share/";
     mStringMap["RecalboxSettingScript"] = "/recalbox/scripts/recalbox-config.sh";
