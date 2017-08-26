@@ -23,8 +23,7 @@ std::string strToUpper(const std::string& from)
     return boost::locale::to_upper(str);
 }
 
-
-#if _MSC_VER < 1800
+#if defined(_WIN32) && _MSC_VER < 1800
 float round(float num)
 {
 	return (float)((int)(num + 0.5f));
