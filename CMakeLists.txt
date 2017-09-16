@@ -62,6 +62,7 @@ find_package(Boost REQUIRED COMPONENTS system filesystem date_time regex locale 
 find_package(Eigen3 REQUIRED)
 find_package(CURL REQUIRED)
 find_package(OpenSSL REQUIRED)
+find_package(Lua52 REQUIRED)
 
 #add ALSA for Linux
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
@@ -126,8 +127,9 @@ set(COMMON_INCLUDE_DIRS
     ${Boost_INCLUDE_DIRS}
     ${EIGEN3_INCLUDE_DIR}
     ${CURL_INCLUDE_DIR}
-
+    ${LUA_INCLUDE_DIR}
 )
+
 
 #add ALSA for Linux
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
@@ -178,6 +180,7 @@ set(COMMON_LIBRARIES
     pugixml
     nanosvg
     crypto
+    ${LUA_LIBRARY}
 )
 
 #add ALSA for Linux

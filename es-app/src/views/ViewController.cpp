@@ -52,10 +52,7 @@ void ViewController::goToStart()
 	mCurrentView.reset();
 	playViewTransition(); */
 	int firstSystemIndex = getFirstSystemIndex();
-	if (Settings::getInstance()->getBool("HideSystemView") || RecalboxConf::getInstance()->get("system.es.bootongamelist") == "1")
-	  goToGameList(SystemData::sSystemVector.at(firstSystemIndex));
-	else
-	  goToSystemView(SystemData::sSystemVector.at(firstSystemIndex));
+	goToSystemView(SystemData::sSystemVector.at(firstSystemIndex));
 }
 
 int ViewController::getSystemId(SystemData* system)

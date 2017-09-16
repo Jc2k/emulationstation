@@ -5,6 +5,8 @@
 #include <utility>
 #include <stdlib.h>
 #include <SDL_joystick.h>
+#include <lua.hpp>
+
 #include "Renderer.h"
 #include "AudioManager.h"
 #include "VolumeControl.h"
@@ -31,7 +33,7 @@ SystemData::SystemData(std::string name, std::string fullName, std::string theme
 	mFullName = fullName;
   mThemeFolder = themeFolder;
   mStartPath = "";
-	mLaunchCommand = "";
+	mLaunchScript = "";
 
 	mRootFolder = new FileData(FOLDER, mStartPath, this);
 	mRootFolder->metadata.set("name", mFullName);
@@ -43,8 +45,7 @@ SystemData::SystemData(std::string name, std::string fullName, std::string theme
 }
 
 SystemData::SystemData(std::string name, std::string fullName, std::string startPath,
-                           std::vector<std::string> extensions, std::string command,
-                           std::string hostCommand, std::string joinCommand,
+                           std::vector<std::string> extensions, std::string launchScript,
                            std::vector<PlatformIds::PlatformId> platformIds, std::string themeFolder,
                            std::map<std::string, std::vector<std::string>*>* emulators)
 {
@@ -64,9 +65,7 @@ SystemData::SystemData(std::string name, std::string fullName, std::string start
 	}
 
 	mSearchExtensions = extensions;
-	mLaunchCommand = command;
-  mHostCommand = hostCommand;
-  mJoinCommand = joinCommand;
+	mLaunchScript = launchScript;
 	mPlatformIds = platformIds;
 	mThemeFolder = themeFolder;
 
@@ -84,14 +83,14 @@ SystemData::SystemData(std::string name, std::string fullName, std::string start
 	loadTheme();
 }
 
-SystemData::SystemData(std::string name, std::string fullName, std::string command,
+SystemData::SystemData(std::string name, std::string fullName, std::string launchScript,
 					   std::string themeFolder, std::vector<SystemData*>* systems)
 {
 	mName = name;
 	mFullName = fullName;
 	mStartPath = "";
 
-	mLaunchCommand = command;
+	mLaunchScript = launchScript;
 	mThemeFolder = themeFolder;
 
 	mRootFolder = new FileData(FOLDER, mStartPath, this);
@@ -161,37 +160,49 @@ std::string escapePath(const boost::filesystem::path& path)
 #endif
 }
 
-std::string SystemData::getLaunchCommandForGame(FileData *game) {
-  bool multiplayerEnabled = true;
+void setglobal(lua_State *state, const char *key, std::string value) {
+  lua_pushstring(state, value.c_str());
+  lua_setglobal(state, key);
+}
 
-  std::string command;
-  if (!game->metadata.get("peer").empty())
-    command = game->getSystem()->mJoinCommand;
-  else if (multiplayerEnabled)
-    command = game->getSystem()->mHostCommand;
-  else
-    command = game->getSystem()->mLaunchCommand;
+int SystemData::runLaunchGameScript(FileData *game) {
+  lua_State *state = luaL_newstate();
 
-  const std::string rom = escapePath(game->getPath());
-  command = strreplace(command, "%ROM%", rom);
+  luaL_openlibs(state);
 
-  const std::string controlersConfig = InputManager::getInstance()->configureEmulators();
-  LOG(LogInfo) << "Controllers config : " << controlersConfig;
-  command = strreplace(command, "%CONTROLLERSCONFIG%", controlersConfig);
+  setglobal(state, "rom", escapePath(game->getPath()));
+  setglobal(state, "controllers_config", InputManager::getInstance()->configureEmulators()) ;
+  setglobal(state, "basename", game->getPath().stem().string());
+  setglobal(state, "rom_raw", fs::path(game->getPath()).make_preferred().string());
+  setglobal(state, "system", game->metadata.get("system"));
+  setglobal(state, "emulator", game->metadata.get("emulator"));
+  setglobal(state, "core", game->metadata.get("core"));
+  setglobal(state, "ratio", game->metadata.get("ratio"));
+  setglobal(state, "peer", game->metadata.get("peer"));
 
-  const std::string basename = game->getPath().stem().string();
-  command = strreplace(command, "%BASENAME%", basename);
+  lua_pushboolean(state, true);
+  lua_setglobal(state, "multiplayer_enabled");
 
-  const std::string rom_raw = fs::path(game->getPath()).make_preferred().string();
-  command = strreplace(command, "%ROM_RAW%", rom_raw);
+  lua_pushboolean(state, !game->metadata.get("peer").empty());
+  lua_setglobal(state, "join_existing");
 
-  command = strreplace(command, "%SYSTEM%", game->metadata.get("system"));
-  command = strreplace(command, "%EMULATOR%", game->metadata.get("emulator"));
-  command = strreplace(command, "%CORE%", game->metadata.get("core"));
-  command = strreplace(command, "%RATIO%", game->metadata.get("ratio"));
-  command = strreplace(command, "%PEER%", game->metadata.get("peer"));
+  auto error = luaL_loadstring(state, mLaunchScript .c_str());
+  if(error)
+  {
+      std::cout << lua_tostring(state, -1) << std::endl;
+      lua_pop(state, 1);
+      // return; //Perhaps throw or something to signal an error?
+  }
 
-  return command;
+  error = lua_pcall(state, 0, 0, 0);
+  if (error) {
+      std::cout << lua_tostring(state, -1) << std::endl;
+      lua_pop(state, 1);
+  }
+
+  lua_close(state);
+
+  return 0;
 }
 
 void SystemData::launchGame(Window* window, FileData* game)
@@ -206,11 +217,8 @@ void SystemData::launchGame(Window* window, FileData* game)
   if (game->metadata.get("peer").empty())
     LobbyThread::getInstance()->startBroadcast(game->metadata.get("hash"));
 
-  std::string command = getLaunchCommandForGame(game);
-	LOG(LogInfo) << "	" << command;
-
 	std::cout << "==============================================\n";
-	int exitCode = runSystemCommand(command);
+  auto exitCode = runLaunchGameScript(game);
 	std::cout << "==============================================\n";
 
 	if(exitCode != 0){
@@ -277,9 +285,7 @@ SystemData * createSystem(pugi::xml_node * systemsNode, int index ){
 	// convert extensions list from a string into a vector of strings
 	std::vector<std::string> extensions = readList(system->child("extension").text().get());
 
-	std::string cmd = system->child("command").text().get();
-  std::string hostCommand = system->child("hostCommand").text().get();
-  std::string joinCommand = system->child("joinCommand").text().get();
+	std::string launchScript = system->child("launchScript").text().get();
 
 	// platform id list
 	const char* platformList = system->child("platform").text().get();
@@ -309,9 +315,9 @@ SystemData * createSystem(pugi::xml_node * systemsNode, int index ){
 	themeFolder = system->child("theme").text().as_string(name.c_str());
 
 	//validate
-	if(name.empty() || path.empty() || extensions.empty() || cmd.empty())
+	if(name.empty() || path.empty() || extensions.empty() || launchScript.empty())
 	{
-		LOG(LogError) << "System \"" << name << "\" is missing name, path, extension, or command!";
+		LOG(LogError) << "System \"" << name << "\" is missing name, path, extension, or launchScript!";
 		return NULL;
 	}
 
@@ -336,7 +342,7 @@ SystemData * createSystem(pugi::xml_node * systemsNode, int index ){
 	SystemData* newSys = new EmulatorData(name,
 										fullname,
 										path, extensions,
-										cmd, hostCommand, joinCommand,
+										launchScript,
                     platformIds,
 										themeFolder,
 										systemEmulators);

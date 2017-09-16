@@ -14,12 +14,11 @@ public:
 	SystemData(std::string name, std::string fullName, std::string themeFolder);
 
 	SystemData(std::string name, std::string fullName, std::string startPath,
-                               std::vector<std::string> extensions, std::string command,
-	                             std::string hostCommand, std::string joinCommand,
+                               std::vector<std::string> extensions, std::string launchScript,
                                std::vector<PlatformIds::PlatformId> platformIds, std::string themeFolder,
                                std::map<std::string, std::vector<std::string>*>* map);
 
-	SystemData(std::string name, std::string fullName, std::string command,
+	SystemData(std::string name, std::string fullName, std::string launchScript,
 			   std::string themeFolder, std::vector<SystemData*>* systems);
 
 	~SystemData();
@@ -81,7 +80,7 @@ public:
 	// refresh the roms files
 	void refreshRootFolder();
 
-	std::string getLaunchCommandForGame(FileData *game);
+	int runLaunchGameScript(FileData *game);
 
 	std::map<std::string, std::vector<std::string> *> * getEmulators();
 
@@ -94,9 +93,7 @@ private:
 	std::string mFullName;
 	std::string mStartPath;
 	std::vector<std::string> mSearchExtensions;
-	std::string mLaunchCommand;
-	std::string mHostCommand;
-	std::string mJoinCommand;
+	std::string mLaunchScript;
 	std::string mThemeFolder;
 	std::shared_ptr<ThemeData> mTheme;
 
