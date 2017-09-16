@@ -25,7 +25,7 @@ IF (LUA_USE_LUAJIT)
     SET (LUA_INCLUDE_DIRS /usr/include/luajit-2.0 /usr/local/include/luajit-2.0)
 ELSE (LUA_USE_LUAJIT)
     SET (LUA_INTERPRETER_TYPE "Lua")
-    SET (LUA_LIBRARY_NAME lua5.2)
+    SET (LUA_LIBRARY_NAME lua5.2 lua)
     SET (LUA_INCLUDE_DIRS /usr/include/lua5.2 /usr/local/include/lua5.2)
 ENDIF(LUA_USE_LUAJIT)
  
