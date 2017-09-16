@@ -186,7 +186,7 @@ int SystemData::runLaunchGameScript(FileData *game) {
   lua_pushboolean(state, !game->metadata.get("peer").empty());
   lua_setglobal(state, "join_existing");
 
-  auto error = luaL_loadstring(state, mLaunchScript .c_str());
+  auto error = luaL_loadstring(state, game->getSystem()->mLaunchScript.c_str());
   if(error)
   {
       std::cout << lua_tostring(state, -1) << std::endl;
