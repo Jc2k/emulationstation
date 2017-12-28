@@ -2,7 +2,6 @@
 
 #include <SDL.h>
 #include <boost/filesystem.hpp>
-#include <boost/regex.hpp>
 #include <views/SystemView.h>
 #include "Log.h"
 #include "RecalboxConf.h"
@@ -185,8 +184,6 @@ std::vector<std::string> getMusicIn(const std::string &path) {
         return all_matching_files;
     }
     const std::string target_path(path);
-    const boost::regex my_filter(".*\\.(mp3|ogg)$");
-
 
     boost::filesystem::directory_iterator end_itr; // Default ctor yields past-the-end
     for (boost::filesystem::directory_iterator i(target_path); i != end_itr; ++i) {
@@ -194,9 +191,6 @@ std::vector<std::string> getMusicIn(const std::string &path) {
         if (!boost::filesystem::is_regular_file(i->status())) continue;
 
         boost::smatch what;
-
-        // Skip if no match
-        if (!boost::regex_match(i->path().string(), what, my_filter)) continue;
 
         // File matches, store it
         all_matching_files.push_back(i->path().string());
