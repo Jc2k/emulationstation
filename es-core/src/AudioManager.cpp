@@ -190,8 +190,6 @@ std::vector<std::string> getMusicIn(const std::string &path) {
         // Skip if not a file
         if (!boost::filesystem::is_regular_file(i->status())) continue;
 
-        boost::smatch what;
-
         // File matches, store it
         all_matching_files.push_back(i->path().string());
     }
